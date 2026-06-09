@@ -52,6 +52,8 @@ export function createPlayer() {
 }
 
 const LANE_SWITCH_SPEED = 10;
+const JUMP_DURATION = 0.6;
+const JUMP_HEIGHT = 2;
 
 export function updatePlayer(player, input, dt) {
   if (input.wasJustPressed('ArrowLeft') && player.lane > 0) {
@@ -68,5 +70,21 @@ export function updatePlayer(player, input, dt) {
     player.mesh.position.x = targetX;
   } else {
     player.mesh.position.x += Math.sign(dx) * step;
+  }
+
+  if (input.wasJustPressed('ArrowUp') && !player.jumping) {
+    player.jumping = true;
+    player.jumpTime = 0;
+  }
+
+  if (player.jumping) {
+    player.jumpTime += dt;
+    const t = player.jumpTime / JUMP_DURATION;
+    if (t >= 1) {
+      player.jumping = false;
+      player.mesh.position.y = 0;
+    } else {
+      player.mesh.position.y = JUMP_HEIGHT * 4 * t * (1 - t);
+    }
   }
 }
