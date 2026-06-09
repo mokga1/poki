@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
-import { createPlayer } from './player.js';
+import { createPlayer, updatePlayer } from './player.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
@@ -47,8 +47,16 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+let lastTime = performance.now();
+
 function loop() {
   requestAnimationFrame(loop);
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.05);
+  lastTime = now;
+
+  updatePlayer(player, { wasJustPressed, isPressed }, dt);
+
   clearJustPressed();
   renderer.render(scene, camera);
 }

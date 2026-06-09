@@ -50,3 +50,23 @@ export function createPlayer() {
     sliding: false,
   };
 }
+
+const LANE_SWITCH_SPEED = 10;
+
+export function updatePlayer(player, input, dt) {
+  if (input.wasJustPressed('ArrowLeft') && player.lane > 0) {
+    player.lane -= 1;
+  }
+  if (input.wasJustPressed('ArrowRight') && player.lane < 2) {
+    player.lane += 1;
+  }
+
+  const targetX = (player.lane - 1) * LANE_WIDTH;
+  const dx = targetX - player.mesh.position.x;
+  const step = LANE_SWITCH_SPEED * dt;
+  if (Math.abs(dx) < step) {
+    player.mesh.position.x = targetX;
+  } else {
+    player.mesh.position.x += Math.sign(dx) * step;
+  }
+}
