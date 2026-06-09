@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
@@ -44,6 +45,7 @@ window.addEventListener('resize', () => {
 
 function loop() {
   requestAnimationFrame(loop);
+  clearJustPressed();
   renderer.render(scene, camera);
 }
 loop();
