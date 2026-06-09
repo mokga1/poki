@@ -87,4 +87,11 @@ export function updatePlayer(player, input, dt) {
       player.mesh.position.y = JUMP_HEIGHT * 4 * t * (1 - t);
     }
   }
+
+  const wantSlide = input.isPressed('ArrowDown') && !player.jumping;
+  if (wantSlide !== player.sliding) {
+    player.sliding = wantSlide;
+    player.mesh.scale.y = wantSlide ? 0.5 : 1;
+    player.mesh.position.y = wantSlide ? 0 : player.mesh.position.y;
+  }
 }
