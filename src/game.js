@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
+import { createPlayer } from './player.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
@@ -36,6 +37,9 @@ for (let i = -1; i <= 1; i += 2) {
   line.position.set(i * LANE_WIDTH / 2, 0.01, -TRACK_LENGTH / 2 + 10);
   scene.add(line);
 }
+
+const player = createPlayer();
+scene.add(player.mesh);
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
