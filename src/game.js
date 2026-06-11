@@ -129,4 +129,12 @@ function resetGame() {
   gameOverEl.classList.remove('show');
 }
 
+// 테스트/디버깅용 훅 (콘솔에서 게임 상태 접근)
+window.__game = {
+  world,
+  player,
+  get gameOver() { return gameOver; },
+  reset: resetGame,
+};
+
 loop();
