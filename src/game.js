@@ -32,12 +32,15 @@ window.addEventListener('resize', () => {
 });
 
 let lastTime = performance.now();
+let score = 0;
+const scoreEl = document.getElementById('score');
 
 function loop() {
   requestAnimationFrame(loop);
   const now = performance.now();
   const dt = Math.min((now - lastTime) / 1000, 0.05);
   lastTime = now;
+  score += dt;
 
   updateWorld(world, dt);
   updatePlayer(player, { wasJustPressed, isPressed }, dt);
@@ -49,10 +52,12 @@ function loop() {
     const dz = c.position.z - player.mesh.position.z;
     if (dx * dx + dy * dy + dz * dz < 0.8 * 0.8) {
       c.visible = false;
+      score += 10;
     }
   }
 
   clearJustPressed();
+  scoreEl.textContent = Math.floor(score);
   renderer.render(scene, camera);
 }
 loop();
