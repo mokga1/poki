@@ -146,12 +146,14 @@ export function makeBarricade(lane) {
 }
 
 export function makeSign(lane) {
+  // y 0.9~1.2 구간: 서면 부딪히고, 슬라이드(높이 0.8)와 점프 둘 다로 통과 가능.
+  // 슬라이드 머리(0.8)와 간판 아래면 사이에 0.1 여유를 둬서 부동소수점 경계 문제를 피한다.
   const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.8, 0.8, 0.4),
+    new THREE.BoxGeometry(1.8, 0.3, 0.4),
     new THREE.MeshLambertMaterial({ color: 0x4488ff }),
   );
-  mesh.position.set((lane - 1) * LANE_WIDTH, 1.2, SPAWN_DISTANCE);
-  mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.8, depth: 0.4 };
+  mesh.position.set((lane - 1) * LANE_WIDTH, 1.05, SPAWN_DISTANCE);
+  mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.3, depth: 0.4 };
   return mesh;
 }
 
