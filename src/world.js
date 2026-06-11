@@ -111,6 +111,16 @@ export function updateWorld(world, dt) {
     else obstacle = makeSign(lane);
     world.obstacles.push(obstacle);
     world.scene.add(obstacle);
+
+    // 정지 기차의 절반 정도는 지붕 위에 코인을 얹는다.
+    // 정지 기차와 코인은 같은 속도로 흐르므로 위치가 계속 맞는다.
+    if (obstacle.userData.type === 'static_train' && Math.random() < 0.5) {
+      for (let i = -1; i <= 1; i++) {
+        const coin = makeCoin(lane, SPAWN_DISTANCE + i * 2, TRAIN_HEIGHT + 0.8);
+        world.coins.push(coin);
+        world.scene.add(coin);
+      }
+    }
   }
 }
 
@@ -165,6 +175,35 @@ function makeCoin(lane, z, y = 0.8) {
   mesh.position.set((lane - 1) * LANE_WIDTH, y, z);
   mesh.userData = { type: 'coin', lane };
   return mesh;
+}
+
+const TRAIN_HALF_DEPTH = 3;
+const TRAIN_HEIGHT = 2;
+const STAIRS_DEPTH = 1.5;
+
+// 특정 z 위치에서 기차 표면(지붕/계단 경사)의 높이.
+// 몸체 구간은 지붕 높이 2, 계단 구간은 0→2로 올라가는 경사, 그 외는 0.
+// 지붕 구간을 꼬리쪽으로 0.4 연장: 플레이어(두께 0.3)가 몸체 충돌 범위를
+// 완전히 벗어난 뒤에 떨어지기 시작해야 낙하 중 꼬리에 부딪히지 않는다.
+export function trainSurfaceHeight(train, worldZ) {
+  const local = worldZ - train.position.z;
+  if (local >= -(TRAIN_HALF_DEPTH + 0.4) && local <= TRAIN_HALF_DEPTH) return TRAIN_HEIGHT;
+  if (local > TRAIN_HALF_DEPTH && local <= TRAIN_HALF_DEPTH + STAIRS_DEPTH) {
+    return TRAIN_HEIGHT * (TRAIN_HALF_DEPTH + STAIRS_DEPTH - local) / STAIRS_DEPTH;
+  }
+  return 0;
+}
+
+// 플레이어 발밑 지지 높이. x 허용 범위 1.1은 충돌 판정(몸체 0.8 + 플레이어 0.3)과
+// 일치시켜서, 지붕 위에서 차선을 바꿀 때 몸체와 겹친 채 떨어지는 일이 없게 한다.
+export function getSupportHeight(world, x, z) {
+  let h = 0;
+  for (const o of world.obstacles) {
+    if (o.userData.type !== 'static_train') continue;
+    if (Math.abs(o.position.x - x) > 1.1) continue;
+    h = Math.max(h, trainSurfaceHeight(o, z));
+  }
+  return h;
 }
 
 export function makeStaticTrain(lane) {

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
 import { createPlayer, updatePlayer, getPlayerBox } from './player.js';
-import { createWorld, updateWorld } from './world.js';
+import { createWorld, updateWorld, getSupportHeight, trainSurfaceHeight } from './world.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
@@ -37,7 +37,8 @@ const scoreEl = document.getElementById('score');
 let gameOver = false;
 let elapsed = 0;
 const BASE_SPEED = 12;
-const MAX_SPEED = 24;
+const MAX_SPEED = 30;
+const SPEED_RAMP_SECONDS = 40;
 const HIGH_KEY = 'poki_high_score';
 let highScore = Number(localStorage.getItem(HIGH_KEY) || 0);
 const highScoreEl = document.getElementById('high-score');
@@ -74,11 +75,12 @@ function loop() {
 
   if (!gameOver) {
     elapsed += dt;
-    const t = Math.min(elapsed / 60, 1);
+    const t = Math.min(elapsed / SPEED_RAMP_SECONDS, 1);
     world.speed = BASE_SPEED + (MAX_SPEED - BASE_SPEED) * t;
     score += dt;
     updateWorld(world, dt);
-    updatePlayer(player, { wasJustPressed, isPressed }, dt);
+    const groundY = getSupportHeight(world, player.mesh.position.x, player.mesh.position.z);
+    updatePlayer(player, { wasJustPressed, isPressed }, dt, groundY);
 
     for (const c of world.coins) {
       if (!c.visible) continue;
@@ -94,6 +96,11 @@ function loop() {
     const pb = getPlayerBox(player);
     for (const o of world.obstacles) {
       if (o.userData.type === 'barricade' && player.sliding) continue;
+      // 계단/지붕 표면 위에 올라타 있는 동안은 정지 기차와 충돌하지 않는다
+      if (o.userData.type === 'static_train') {
+        const surface = trainSurfaceHeight(o, player.mesh.position.z);
+        if (surface > 0 && player.mesh.position.y >= surface - 0.01) continue;
+      }
       if (boxOverlap(pb, getObstacleBox(o))) {
         triggerGameOver();
         break;

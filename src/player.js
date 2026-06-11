@@ -66,8 +66,10 @@ export function getPlayerBox(player) {
 const LANE_SWITCH_SPEED = 10;
 const JUMP_DURATION = 0.6;
 const JUMP_HEIGHT = 2;
+const FALL_SPEED = 10;
 
-export function updatePlayer(player, input, dt) {
+// groundY: 발밑 지지 높이 (평지 0, 기차 지붕 2, 계단 경사는 그 사이)
+export function updatePlayer(player, input, dt, groundY = 0) {
   if (input.wasJustPressed('ArrowLeft') && player.lane > 0) {
     player.lane -= 1;
   }
@@ -94,9 +96,18 @@ export function updatePlayer(player, input, dt) {
     const t = player.jumpTime / JUMP_DURATION;
     if (t >= 1) {
       player.jumping = false;
-      player.mesh.position.y = 0;
+      player.mesh.position.y = groundY;
     } else {
-      player.mesh.position.y = JUMP_HEIGHT * 4 * t * (1 - t);
+      player.mesh.position.y = groundY + JUMP_HEIGHT * 4 * t * (1 - t);
+    }
+  } else {
+    const y = player.mesh.position.y;
+    if (y > groundY) {
+      // 지지면이 사라지면 (기차 끝) 아래로 떨어진다
+      player.mesh.position.y = Math.max(groundY, y - FALL_SPEED * dt);
+    } else {
+      // 계단 경사를 따라 올라가거나 지면에 붙는다
+      player.mesh.position.y = groundY;
     }
   }
 
@@ -104,7 +115,6 @@ export function updatePlayer(player, input, dt) {
   if (wantSlide !== player.sliding) {
     player.sliding = wantSlide;
     player.mesh.scale.y = wantSlide ? 0.5 : 1;
-    player.mesh.position.y = wantSlide ? 0 : player.mesh.position.y;
   }
 
   if (!player.runTime) player.runTime = 0;
