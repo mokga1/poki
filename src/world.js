@@ -209,14 +209,66 @@ export function updateWorld(world, dt) {
   }
 }
 
-export function makeMovingTrain(lane) {
+// 기차 몸체 + 지붕 + 창문 + 바퀴 공통 조립 (충돌 박스 1.6 x 2 x 6 과 동일 부피)
+function makeTrainBody(bodyColor, windowColor) {
   const group = new THREE.Group();
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(1.6, 2, 6),
-    new THREE.MeshLambertMaterial({ color: 0xcc2222 }),
+    new THREE.MeshLambertMaterial({ color: bodyColor }),
   );
   body.position.y = 1;
   group.add(body);
+
+  // 지붕 판: 윗면이 정확히 충돌 높이(2)와 같아서 지붕 위를 달릴 때 발이 안 묻힌다
+  const roof = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8, 0.15, 6.2),
+    new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  );
+  roof.position.y = 2 - 0.075;
+  group.add(roof);
+
+  const windowMat = new THREE.MeshLambertMaterial({ color: windowColor });
+  for (let side = -1; side <= 1; side += 2) {
+    for (const z of [-1.8, 0, 1.8]) {
+      const win = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.7, 1), windowMat);
+      win.position.set(side * 0.81, 1.3, z);
+      group.add(win);
+    }
+  }
+
+  const wheelMat = new THREE.MeshLambertMaterial({ color: 0x4a4a4a });
+  for (let side = -1; side <= 1; side += 2) {
+    for (const z of [-2, -0.7, 0.7, 2]) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 12), wheelMat);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(side * 0.75, 0.3, z);
+      group.add(wheel);
+    }
+  }
+  return group;
+}
+
+export function makeMovingTrain(lane) {
+  const group = makeTrainBody(0xff6b6b, 0x5a2a2a);
+
+  // 플레이어 쪽(+z)을 바라보는 화난 얼굴 — "위험!" 신호
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const pupilMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+  for (let side = -1; side <= 1; side += 2) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), eyeMat);
+    eye.position.set(side * 0.4, 1.45, 3.02);
+    group.add(eye);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), pupilMat);
+    pupil.position.set(side * 0.4, 1.45, 3.18);
+    group.add(pupil);
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.07, 0.05), pupilMat);
+    brow.position.set(side * 0.4, 1.72, 3.05);
+    brow.rotation.z = side * -0.45;
+    group.add(brow);
+  }
+  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.05), pupilMat);
+  mouth.position.set(0, 1.0, 3.05);
+  group.add(mouth);
 
   group.position.x = (lane - 1) * LANE_WIDTH;
   group.position.z = SPAWN_DISTANCE;
@@ -231,35 +283,61 @@ export function makeMovingTrain(lane) {
 }
 
 export function makeBarricade(lane) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 0.6, 0.6),
-    new THREE.MeshLambertMaterial({ color: 0xff7700 }),
-  );
-  mesh.position.set((lane - 1) * LANE_WIDTH, 0.3, SPAWN_DISTANCE);
-  mesh.userData = { type: 'barricade', lane, width: 1.6, height: 0.6, depth: 0.6 };
-  return mesh;
+  // 분홍-흰색 가로 줄무늬 3단 (전체 부피는 충돌 박스 1.6 x 0.6 x 0.6 그대로)
+  const group = new THREE.Group();
+  const stripeColors = [0xff7eb6, 0xffffff, 0xff7eb6];
+  stripeColors.forEach((color, i) => {
+    const stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.2, 0.6),
+      new THREE.MeshLambertMaterial({ color }),
+    );
+    stripe.position.y = 0.1 + i * 0.2;
+    group.add(stripe);
+  });
+  group.position.set((lane - 1) * LANE_WIDTH, 0, SPAWN_DISTANCE);
+  group.userData = { type: 'barricade', lane, width: 1.6, height: 0.6, depth: 0.6 };
+  return group;
 }
 
 export function makeSign(lane) {
   // y 0.9~1.2 구간: 서면 부딪히고, 슬라이드(높이 0.8)와 점프 둘 다로 통과 가능.
   // 슬라이드 머리(0.8)와 간판 아래면 사이에 0.1 여유를 둬서 부동소수점 경계 문제를 피한다.
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.8, 0.3, 0.4),
-    new THREE.MeshLambertMaterial({ color: 0x4488ff }),
-  );
-  mesh.position.set((lane - 1) * LANE_WIDTH, 1.05, SPAWN_DISTANCE);
-  mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.3, depth: 0.4 };
-  return mesh;
+  // 충돌 판정은 group.position 기준 1.8 x 0.3 x 0.4 막대 부분만이고 기둥은 장식.
+  const group = new THREE.Group();
+  const stripeColors = [0xff5e5e, 0xffa552, 0xffe04d, 0x7ed957, 0x5ec8ff, 0xb86aff];
+  stripeColors.forEach((color, i) => {
+    const stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.3, 0.4),
+      new THREE.MeshLambertMaterial({ color }),
+    );
+    stripe.position.x = -0.75 + i * 0.3;
+    group.add(stripe);
+  });
+
+  const postMat = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+  for (let side = -1; side <= 1; side += 2) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 0.08), postMat);
+    post.position.set(side * 0.86, -0.45, 0); // 막대 중심(y 1.05)에서 지면까지
+    group.add(post);
+  }
+
+  group.position.set((lane - 1) * LANE_WIDTH, 1.05, SPAWN_DISTANCE);
+  group.userData = { type: 'sign', lane, width: 1.8, height: 0.3, depth: 0.4 };
+  return group;
 }
 
 function makeCoin(lane, z, y = 0.8) {
-  const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.25, 12, 12),
-    new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0x665500 }),
+  // 세로로 세운 금화 디스크. 바깥 그룹이 y축으로 돌면 동전이 빙글빙글 도는 모양이 된다.
+  const group = new THREE.Group();
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3, 0.3, 0.08, 20),
+    new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0x997700 }),
   );
-  mesh.position.set((lane - 1) * LANE_WIDTH, y, z);
-  mesh.userData = { type: 'coin', lane };
-  return mesh;
+  disc.rotation.x = Math.PI / 2;
+  group.add(disc);
+  group.position.set((lane - 1) * LANE_WIDTH, y, z);
+  group.userData = { type: 'coin', lane };
+  return group;
 }
 
 const TRAIN_HALF_DEPTH = 3;
@@ -292,20 +370,16 @@ export function getSupportHeight(world, x, z) {
 }
 
 export function makeStaticTrain(lane) {
-  const group = new THREE.Group();
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 2, 6),
-    new THREE.MeshLambertMaterial({ color: 0x888888 }),
-  );
-  body.position.y = 1;
-  group.add(body);
+  const group = makeTrainBody(0x8fd4f0, 0xffffff);
 
-  const stairs = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 1, 1.5),
-    new THREE.MeshLambertMaterial({ color: 0xffaa00 }),
-  );
-  stairs.position.set(0, 0.5, 3 + 0.75);
-  group.add(stairs);
+  // 황금색 3단 계단 (실제 올라가는 경사는 trainSurfaceHeight 가 처리, 이건 모양)
+  const stepMat = new THREE.MeshLambertMaterial({ color: 0xffc94d });
+  for (let i = 0; i < 3; i++) {
+    const h = 0.5 + i * 0.5;
+    const step = new THREE.Mesh(new THREE.BoxGeometry(1.6, h, 0.5), stepMat);
+    step.position.set(0, h / 2, 4.25 - i * 0.5);
+    group.add(step);
+  }
 
   group.position.x = (lane - 1) * LANE_WIDTH;
   group.position.z = SPAWN_DISTANCE;
