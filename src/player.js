@@ -51,6 +51,18 @@ export function createPlayer() {
   };
 }
 
+export function getPlayerBox(player) {
+  const x = player.mesh.position.x;
+  const y = player.mesh.position.y;
+  const z = player.mesh.position.z;
+  const h = player.sliding ? 0.8 : 1.6;
+  return {
+    minX: x - 0.3, maxX: x + 0.3,
+    minY: y,       maxY: y + h,
+    minZ: z - 0.3, maxZ: z + 0.3,
+  };
+}
+
 const LANE_SWITCH_SPEED = 10;
 const JUMP_DURATION = 0.6;
 const JUMP_HEIGHT = 2;

@@ -147,11 +147,11 @@ export function makeBarricade(lane) {
 
 export function makeSign(lane) {
   const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.8, 0.4, 0.4),
+    new THREE.BoxGeometry(1.8, 0.8, 0.4),
     new THREE.MeshLambertMaterial({ color: 0x4488ff }),
   );
-  mesh.position.set((lane - 1) * LANE_WIDTH, 2, SPAWN_DISTANCE);
-  mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.4, depth: 0.4 };
+  mesh.position.set((lane - 1) * LANE_WIDTH, 1.2, SPAWN_DISTANCE);
+  mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.8, depth: 0.4 };
   return mesh;
 }
 
