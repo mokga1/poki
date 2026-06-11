@@ -38,6 +38,9 @@ let gameOver = false;
 let elapsed = 0;
 const BASE_SPEED = 12;
 const MAX_SPEED = 24;
+const HIGH_KEY = 'poki_high_score';
+let highScore = Number(localStorage.getItem(HIGH_KEY) || 0);
+const highScoreEl = document.getElementById('high-score');
 const gameOverEl = document.getElementById('gameover');
 const finalScoreEl = document.getElementById('final-score');
 
@@ -110,7 +113,14 @@ function loop() {
 
 function triggerGameOver() {
   gameOver = true;
-  finalScoreEl.textContent = `점수: ${Math.floor(score)}`;
+  const finalScore = Math.floor(score);
+  const isNewRecord = finalScore > highScore;
+  if (isNewRecord) {
+    highScore = finalScore;
+    localStorage.setItem(HIGH_KEY, String(highScore));
+  }
+  finalScoreEl.textContent = `점수: ${finalScore}` + (isNewRecord ? '  🎉 신기록!' : '');
+  highScoreEl.textContent = `최고 점수: ${highScore}`;
   gameOverEl.classList.add('show');
 }
 
