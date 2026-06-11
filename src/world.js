@@ -21,6 +21,7 @@ export function createWorld(scene) {
     coins: [],
     speed: 12,
     distanceSinceSpawn: 0,
+    distanceSinceCoin: 0,
   };
 }
 
@@ -73,6 +74,30 @@ export function updateWorld(world, dt) {
     }
     return true;
   });
+
+  for (const c of world.coins) {
+    c.position.z += dz;
+    c.rotation.y += dt * 4;
+  }
+  world.coins = world.coins.filter(c => {
+    if (c.position.z > DESPAWN_Z || !c.visible) {
+      world.scene.remove(c);
+      return false;
+    }
+    return true;
+  });
+
+  world.distanceSinceCoin += dz;
+  if (world.distanceSinceCoin >= 6) {
+    world.distanceSinceCoin = 0;
+    const lane = Math.floor(Math.random() * 3);
+    const count = 1 + Math.floor(Math.random() * 6);
+    for (let i = 0; i < count; i++) {
+      const coin = makeCoin(lane, SPAWN_DISTANCE - i * 1.5);
+      world.coins.push(coin);
+      world.scene.add(coin);
+    }
+  }
 
   world.distanceSinceSpawn += dz;
   if (world.distanceSinceSpawn >= 25) {
@@ -127,6 +152,16 @@ export function makeSign(lane) {
   );
   mesh.position.set((lane - 1) * LANE_WIDTH, 2, SPAWN_DISTANCE);
   mesh.userData = { type: 'sign', lane, width: 1.8, height: 0.4, depth: 0.4 };
+  return mesh;
+}
+
+function makeCoin(lane, z, y = 0.8) {
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.25, 12, 12),
+    new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0x665500 }),
+  );
+  mesh.position.set((lane - 1) * LANE_WIDTH, y, z);
+  mesh.userData = { type: 'coin', lane };
   return mesh;
 }
 

@@ -42,6 +42,16 @@ function loop() {
   updateWorld(world, dt);
   updatePlayer(player, { wasJustPressed, isPressed }, dt);
 
+  for (const c of world.coins) {
+    if (!c.visible) continue;
+    const dx = c.position.x - player.mesh.position.x;
+    const dy = c.position.y - (player.mesh.position.y + 0.8);
+    const dz = c.position.z - player.mesh.position.z;
+    if (dx * dx + dy * dy + dz * dz < 0.8 * 0.8) {
+      c.visible = false;
+    }
+  }
+
   clearJustPressed();
   renderer.render(scene, camera);
 }
