@@ -35,6 +35,9 @@ let lastTime = performance.now();
 let score = 0;
 const scoreEl = document.getElementById('score');
 let gameOver = false;
+let elapsed = 0;
+const BASE_SPEED = 12;
+const MAX_SPEED = 24;
 const gameOverEl = document.getElementById('gameover');
 const finalScoreEl = document.getElementById('final-score');
 
@@ -67,6 +70,9 @@ function loop() {
   lastTime = now;
 
   if (!gameOver) {
+    elapsed += dt;
+    const t = Math.min(elapsed / 60, 1);
+    world.speed = BASE_SPEED + (MAX_SPEED - BASE_SPEED) * t;
     score += dt;
     updateWorld(world, dt);
     updatePlayer(player, { wasJustPressed, isPressed }, dt);
@@ -115,7 +121,7 @@ function resetGame() {
   world.coins = [];
   world.distanceSinceSpawn = 0;
   world.distanceSinceCoin = 0;
-  world.speed = 12;
+  world.speed = BASE_SPEED;
 
   player.lane = 1;
   player.jumping = false;
@@ -125,6 +131,7 @@ function resetGame() {
   player.mesh.scale.y = 1;
 
   score = 0;
+  elapsed = 0;
   gameOver = false;
   gameOverEl.classList.remove('show');
 }
