@@ -4,6 +4,8 @@ export const LANE_WIDTH = 2;
 const TRACK_WIDTH = LANE_WIDTH * 3;
 const SEGMENT_LENGTH = 20;
 const NUM_SEGMENTS = 12;
+const SPAWN_DISTANCE = -180;
+const DESPAWN_Z = 15;
 
 export function createWorld(scene) {
   const segments = [];
@@ -13,8 +15,12 @@ export function createWorld(scene) {
     scene.add(seg);
   }
   return {
+    scene,
     segments,
+    obstacles: [],
+    coins: [],
     speed: 12,
+    distanceSinceSpawn: 0,
   };
 }
 
@@ -44,6 +50,7 @@ function makeGroundSegment(index) {
 
 export function updateWorld(world, dt) {
   const dz = world.speed * dt;
+
   for (const seg of world.segments) {
     seg.position.z += dz;
     if (seg.position.z > SEGMENT_LENGTH + 10) {
@@ -51,4 +58,52 @@ export function updateWorld(world, dt) {
       seg.position.z = minZ - SEGMENT_LENGTH;
     }
   }
+
+  for (const o of world.obstacles) {
+    o.position.z += dz;
+  }
+  world.obstacles = world.obstacles.filter(o => {
+    if (o.position.z > DESPAWN_Z) {
+      world.scene.remove(o);
+      return false;
+    }
+    return true;
+  });
+
+  world.distanceSinceSpawn += dz;
+  if (world.distanceSinceSpawn >= 25) {
+    world.distanceSinceSpawn = 0;
+    const lane = Math.floor(Math.random() * 3);
+    const train = makeStaticTrain(lane);
+    world.obstacles.push(train);
+    world.scene.add(train);
+  }
+}
+
+export function makeStaticTrain(lane) {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 2, 6),
+    new THREE.MeshLambertMaterial({ color: 0x888888 }),
+  );
+  body.position.y = 1;
+  group.add(body);
+
+  const stairs = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 1, 1.5),
+    new THREE.MeshLambertMaterial({ color: 0xffaa00 }),
+  );
+  stairs.position.set(0, 0.5, 3 + 0.75);
+  group.add(stairs);
+
+  group.position.x = (lane - 1) * LANE_WIDTH;
+  group.position.z = SPAWN_DISTANCE;
+
+  group.userData = {
+    type: 'static_train',
+    lane,
+    width: 1.6, height: 2, depth: 6,
+    stairsDepth: 1.5,
+  };
+  return group;
 }
