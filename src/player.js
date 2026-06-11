@@ -106,4 +106,16 @@ export function updatePlayer(player, input, dt) {
     player.mesh.scale.y = wantSlide ? 0.5 : 1;
     player.mesh.position.y = wantSlide ? 0 : player.mesh.position.y;
   }
+
+  if (!player.runTime) player.runTime = 0;
+  player.runTime += dt * 8;
+  const swing = Math.sin(player.runTime) * 0.4;
+  const armL = player.mesh.getObjectByName('armL');
+  const armR = player.mesh.getObjectByName('armR');
+  const legL = player.mesh.getObjectByName('legL');
+  const legR = player.mesh.getObjectByName('legR');
+  if (armL) armL.rotation.x = swing;
+  if (armR) armR.rotation.x = -swing;
+  if (legL) legL.rotation.x = -swing;
+  if (legR) legR.rotation.x = swing;
 }
