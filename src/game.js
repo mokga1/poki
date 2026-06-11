@@ -94,6 +94,10 @@ function loop() {
     scoreEl.textContent = Math.floor(score);
   }
 
+  if (gameOver && wasJustPressed('KeyR')) {
+    resetGame();
+  }
+
   clearJustPressed();
   renderer.render(scene, camera);
 }
@@ -102,6 +106,27 @@ function triggerGameOver() {
   gameOver = true;
   finalScoreEl.textContent = `점수: ${Math.floor(score)}`;
   gameOverEl.classList.add('show');
+}
+
+function resetGame() {
+  for (const o of world.obstacles) scene.remove(o);
+  for (const c of world.coins) scene.remove(c);
+  world.obstacles = [];
+  world.coins = [];
+  world.distanceSinceSpawn = 0;
+  world.distanceSinceCoin = 0;
+  world.speed = 12;
+
+  player.lane = 1;
+  player.jumping = false;
+  player.jumpTime = 0;
+  player.sliding = false;
+  player.mesh.position.set(0, 0, 0);
+  player.mesh.scale.y = 1;
+
+  score = 0;
+  gameOver = false;
+  gameOverEl.classList.remove('show');
 }
 
 loop();
