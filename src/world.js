@@ -25,11 +25,16 @@ export function createWorld(scene) {
   };
 }
 
+const GRASS_WIDTH = 9;
+const BLOSSOM_COLORS = [0xf8a8cc, 0xffb7d9, 0xff8fc0];
+const FLOWER_COLORS = [0xff7eb6, 0xffffff, 0xffe066, 0xc59fff];
+const BUILDING_COLORS = [0xaee8d8, 0xffd3a8, 0xd9c2f0, 0xa8d8ff, 0xffc2cc];
+
 function makeGroundSegment(index) {
   const group = new THREE.Group();
   group.position.z = -index * SEGMENT_LENGTH + 10;
 
-  const color = index % 2 === 0 ? 0x555555 : 0x4a4a4a;
+  const color = index % 2 === 0 ? 0xc9a6e8 : 0xbf99e2;
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(TRACK_WIDTH, SEGMENT_LENGTH),
     new THREE.MeshLambertMaterial({ color }),
@@ -40,13 +45,93 @@ function makeGroundSegment(index) {
   for (let i = -1; i <= 1; i += 2) {
     const line = new THREE.Mesh(
       new THREE.PlaneGeometry(0.1, SEGMENT_LENGTH),
-      new THREE.MeshBasicMaterial({ color: 0xffff00 }),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
     );
     line.rotation.x = -Math.PI / 2;
     line.position.set(i * LANE_WIDTH / 2, 0.01, 0);
     group.add(line);
   }
+
+  // 길 양옆 잔디밭 + 장식 (세그먼트와 함께 재활용되어 같이 흘러간다)
+  for (let side = -1; side <= 1; side += 2) {
+    const grass = new THREE.Mesh(
+      new THREE.PlaneGeometry(GRASS_WIDTH, SEGMENT_LENGTH),
+      new THREE.MeshLambertMaterial({ color: index % 2 === 0 ? 0xa5dba5 : 0x99d499 }),
+    );
+    grass.rotation.x = -Math.PI / 2;
+    grass.position.set(side * (TRACK_WIDTH / 2 + GRASS_WIDTH / 2), -0.01, 0);
+    group.add(grass);
+
+    addSideDecorations(group, side);
+  }
   return group;
+}
+
+function addSideDecorations(group, side) {
+  const treeCount = 1 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < treeCount; i++) {
+    const tree = makeBlossomTree();
+    tree.position.set(
+      side * (4.5 + Math.random() * 4),
+      0,
+      -SEGMENT_LENGTH / 2 + Math.random() * SEGMENT_LENGTH,
+    );
+    group.add(tree);
+  }
+
+  const flowerCount = 3 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < flowerCount; i++) {
+    const flower = new THREE.Mesh(
+      new THREE.SphereGeometry(0.12, 6, 6),
+      new THREE.MeshLambertMaterial({
+        color: FLOWER_COLORS[Math.floor(Math.random() * FLOWER_COLORS.length)],
+      }),
+    );
+    flower.position.set(
+      side * (3.6 + Math.random() * 5),
+      0.12,
+      -SEGMENT_LENGTH / 2 + Math.random() * SEGMENT_LENGTH,
+    );
+    group.add(flower);
+  }
+
+  if (Math.random() < 0.5) {
+    const h = 3 + Math.random() * 4;
+    const building = new THREE.Mesh(
+      new THREE.BoxGeometry(2.5, h, 2.5),
+      new THREE.MeshLambertMaterial({
+        color: BUILDING_COLORS[Math.floor(Math.random() * BUILDING_COLORS.length)],
+      }),
+    );
+    building.position.set(
+      side * (10 + Math.random() * 2),
+      h / 2,
+      -SEGMENT_LENGTH / 2 + Math.random() * SEGMENT_LENGTH,
+    );
+    group.add(building);
+  }
+}
+
+function makeBlossomTree() {
+  const tree = new THREE.Group();
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.18, 1, 8),
+    new THREE.MeshLambertMaterial({ color: 0x8d6e63 }),
+  );
+  trunk.position.y = 0.5;
+  tree.add(trunk);
+
+  const color = BLOSSOM_COLORS[Math.floor(Math.random() * BLOSSOM_COLORS.length)];
+  const blossomMat = new THREE.MeshLambertMaterial({ color });
+  const lumps = [
+    [0, 1.5, 0, 0.7], [-0.5, 1.2, 0.1, 0.45], [0.5, 1.25, -0.1, 0.45], [0, 1.1, 0.45, 0.4],
+  ];
+  for (const [x, y, z, r] of lumps) {
+    const lump = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), blossomMat);
+    lump.position.set(x, y, z);
+    tree.add(lump);
+  }
+  return tree;
 }
 
 export function updateWorld(world, dt) {
