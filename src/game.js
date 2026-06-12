@@ -87,7 +87,7 @@ function loop() {
   if (!started) {
     // 시작 화면: 세상은 멈춰 있고 캐릭터만 제자리 달리기
     updatePlayer(player, IDLE_INPUT, dt, 0);
-    if (wasJustPressed('Space')) {
+    if (wasJustPressed('Space') || wasJustPressed('Tap')) {
       started = true;
       startEl.classList.add('hide');
     }
@@ -184,7 +184,7 @@ function loop() {
     toggleMute();
   }
 
-  if (gameOver && wasJustPressed('KeyR')) {
+  if (gameOver && (wasJustPressed('KeyR') || wasJustPressed('Tap'))) {
     resetGame();
   }
 
