@@ -12,27 +12,37 @@ export function createPlayer() {
   const accent = new THREE.MeshLambertMaterial({ color: 0xffffff });
   const shoeMat = new THREE.MeshLambertMaterial({ color: 0xe0408a });
 
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), skin);
-  head.position.y = 1.4;
+  // 큰 머리 = 치비(2등신) 느낌
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), skin);
+  head.position.y = 1.38;
   group.add(head);
 
   // 머리카락: 머리를 덮는 캡 + 흔들리는 포니테일 (이름으로 찾아 애니메이션)
-  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), hair);
-  hairCap.position.set(0, 1.45, -0.05);
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 16), hair);
+  hairCap.position.set(0, 1.44, -0.06);
   group.add(hairCap);
 
   const ponytail = new THREE.Group();
   ponytail.name = 'ponytail';
-  ponytail.position.set(0, 1.45, -0.22);
-  const tailSizes = [[0, -0.02, -0.06, 0.13], [0, -0.22, -0.12, 0.11], [0, -0.42, -0.16, 0.09]];
+  ponytail.position.set(0, 1.5, -0.3);
+  const tailSizes = [[0, -0.02, -0.06, 0.14], [0, -0.24, -0.13, 0.12], [0, -0.46, -0.18, 0.1]];
   for (const [x, y, z, r] of tailSizes) {
     const lump = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), hair);
     lump.position.set(x, y, z);
     ponytail.add(lump);
   }
-  const tie = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.12), accent);
-  tie.position.set(0, 0.08, -0.04);
-  ponytail.add(tie);
+
+  // 포니테일 묶는 자리에 큰 리본 🎀 (가운데 매듭 + 양쪽 날개)
+  const bowMat = new THREE.MeshLambertMaterial({ color: 0xff4f9e });
+  const bowKnot = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), bowMat);
+  bowKnot.position.set(0, 0.08, -0.02);
+  ponytail.add(bowKnot);
+  for (let side = -1; side <= 1; side += 2) {
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.06), bowMat);
+    wing.position.set(side * 0.13, 0.12, -0.02);
+    wing.rotation.z = side * 0.5;
+    ponytail.add(wing);
+  }
   group.add(ponytail);
 
   // 원피스: 몸통 + 퍼지는 치마
@@ -43,6 +53,11 @@ export function createPlayer() {
   const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.48, 0.35, 12), dress);
   skirt.position.y = 0.62;
   group.add(skirt);
+
+  // 치마 밑단 흰 프릴
+  const frill = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 0.08, 12), accent);
+  frill.position.y = 0.45;
+  group.add(frill);
 
   // 팔: 살구색 + 어깨 퍼프 소매 (팔에 붙여서 같이 흔들리게)
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), skin);
@@ -62,6 +77,9 @@ export function createPlayer() {
   const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), skin);
   legL.position.set(-0.12, 0.3, 0);
   legL.name = 'legL';
+  const sockL = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.14, 0.19), accent);
+  sockL.position.set(0, -0.16, 0);
+  legL.add(sockL);
   const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.28), shoeMat);
   shoeL.position.set(0, -0.27, 0.05);
   legL.add(shoeL);
