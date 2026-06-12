@@ -3,6 +3,7 @@ import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
 import { createPlayer, updatePlayer, getPlayerBox } from './player.js';
 import { createWorld, updateWorld, getSupportHeight, trainSurfaceHeight } from './world.js';
 import { createSky, updateSky } from './sky.js';
+import { initSound, playCoin, playJump, playSlide, playGameOver, startBgm, toggleMute } from './sound.js';
 
 const scene = new THREE.Scene();
 
@@ -22,6 +23,7 @@ scene.add(dir);
 
 const world = createWorld(scene);
 const sky = createSky(scene);
+initSound();
 
 const player = createPlayer();
 scene.add(player.mesh);
@@ -81,7 +83,11 @@ function loop() {
     score += dt;
     updateWorld(world, dt);
     const groundY = getSupportHeight(world, player.mesh.position.x, player.mesh.position.z);
+    const wasJumping = player.jumping;
+    const wasSliding = player.sliding;
     updatePlayer(player, { wasJustPressed, isPressed }, dt, groundY);
+    if (player.jumping && !wasJumping) playJump();
+    if (player.sliding && !wasSliding) playSlide();
 
     for (const c of world.coins) {
       if (!c.visible) continue;
@@ -91,6 +97,7 @@ function loop() {
       if (dx * dx + dy * dy + dz * dz < 0.8 * 0.8) {
         c.visible = false;
         score += 10;
+        playCoin();
       }
     }
 
@@ -113,6 +120,10 @@ function loop() {
 
   updateSky(sky, dt);
 
+  if (wasJustPressed('KeyM')) {
+    toggleMute();
+  }
+
   if (gameOver && wasJustPressed('KeyR')) {
     resetGame();
   }
@@ -123,6 +134,7 @@ function loop() {
 
 function triggerGameOver() {
   gameOver = true;
+  playGameOver();
   const finalScore = Math.floor(score);
   const isNewRecord = finalScore > highScore;
   if (isNewRecord) {
@@ -154,6 +166,7 @@ function resetGame() {
   elapsed = 0;
   gameOver = false;
   gameOverEl.classList.remove('show');
+  startBgm();
 }
 
 // 테스트/디버깅용 훅 (콘솔에서 게임 상태 접근)
