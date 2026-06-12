@@ -307,6 +307,7 @@ export function makeMovingTrain(lane) {
 }
 
 export function makeBarricade(lane) {
+  // 점프 전용 울타리: 슬라이드(높이 0.8)로는 못 지나가고 점프로만 넘는다.
   // 분홍-흰색 가로 줄무늬 3단 (전체 부피는 충돌 박스 1.6 x 0.6 x 0.6 그대로)
   const group = new THREE.Group();
   const stripeColors = [0xff7eb6, 0xffffff, 0xff7eb6];
@@ -318,35 +319,78 @@ export function makeBarricade(lane) {
     stripe.position.y = 0.1 + i * 0.2;
     group.add(stripe);
   });
+
+  // 앞면에 ▲ 화살표: "점프로 넘어요"
+  const icon = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.5, 0.5),
+    new THREE.MeshBasicMaterial({ map: makeIconTexture('▲', '#e0408a') }),
+  );
+  icon.position.set(0, 0.3, 0.31);
+  group.add(icon);
+
   group.position.set((lane - 1) * LANE_WIDTH, 0, SPAWN_DISTANCE);
   group.userData = { type: 'barricade', lane, width: 1.6, height: 0.6, depth: 0.6 };
   return group;
 }
 
+// 장애물 통과 방법 안내용 화살표 아이콘 텍스처 (▲ = 점프, ▼ = 슬라이드)
+function makeIconTexture(symbol, bg) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const c2d = canvas.getContext('2d');
+  c2d.fillStyle = bg;
+  c2d.fillRect(0, 0, 64, 64);
+  c2d.font = 'bold 44px sans-serif';
+  c2d.textAlign = 'center';
+  c2d.textBaseline = 'middle';
+  c2d.fillStyle = '#ffffff';
+  c2d.fillText(symbol, 32, 36);
+  return new THREE.CanvasTexture(canvas);
+}
+
 export function makeSign(lane) {
-  // y 0.9~1.2 구간: 서면 부딪히고, 슬라이드(높이 0.8)와 점프 둘 다로 통과 가능.
-  // 슬라이드 머리(0.8)와 간판 아래면 사이에 0.1 여유를 둬서 부동소수점 경계 문제를 피한다.
-  // 충돌 판정은 group.position 기준 1.8 x 0.3 x 0.4 막대 부분만이고 기둥은 장식.
+  // 슬라이드 전용 관문: 아래 틈(y 0~0.9)으로만 지나갈 수 있다.
+  // 막는 부분이 y 0.9~2.5로 점프 최고 높이(2)보다 높아서 점프로는 못 넘는다.
+  // 슬라이드 머리(0.8)와 아래면(0.9) 사이 0.1 여유로 부동소수점 경계 문제도 없다.
+  // 충돌 박스: 1.8 x 1.6 x 0.4, 중심 y 1.7 (게이트 기둥은 장식)
   const group = new THREE.Group();
+
+  // 통과 기준선이 되는 무지개 아래 막대 (world y 0.9~1.2 = local -0.8~-0.5)
   const stripeColors = [0xff5e5e, 0xffa552, 0xffe04d, 0x7ed957, 0x5ec8ff, 0xb86aff];
   stripeColors.forEach((color, i) => {
     const stripe = new THREE.Mesh(
       new THREE.BoxGeometry(0.3, 0.3, 0.4),
       new THREE.MeshLambertMaterial({ color }),
     );
-    stripe.position.x = -0.75 + i * 0.3;
+    stripe.position.set(-0.75 + i * 0.3, -0.65, 0);
     group.add(stripe);
   });
 
+  // 위쪽을 막는 패널 (world y 1.2~2.5 = local -0.5~0.8)
+  const panel = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8, 1.3, 0.3),
+    new THREE.MeshLambertMaterial({ color: 0xc59fff }),
+  );
+  panel.position.set(0, 0.15, 0);
+  group.add(panel);
+
+  // 패널 앞면에 ▼ 화살표: "슬라이드로 지나가요"
+  const icon = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.8, 0.8),
+    new THREE.MeshBasicMaterial({ map: makeIconTexture('▼', '#7a5ad6') }),
+  );
+  icon.position.set(0, 0.15, 0.16);
+  group.add(icon);
+
   const postMat = new THREE.MeshLambertMaterial({ color: 0xcccccc });
   for (let side = -1; side <= 1; side += 2) {
-    const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 0.08), postMat);
-    post.position.set(side * 0.86, -0.45, 0); // 막대 중심(y 1.05)에서 지면까지
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.5, 0.08), postMat);
+    post.position.set(side * 0.86, -0.45, 0); // 지면(0)부터 꼭대기(2.5)까지
     group.add(post);
   }
 
-  group.position.set((lane - 1) * LANE_WIDTH, 1.05, SPAWN_DISTANCE);
-  group.userData = { type: 'sign', lane, width: 1.8, height: 0.3, depth: 0.4 };
+  group.position.set((lane - 1) * LANE_WIDTH, 1.7, SPAWN_DISTANCE);
+  group.userData = { type: 'sign', lane, width: 1.8, height: 1.6, depth: 0.4 };
   return group;
 }
 

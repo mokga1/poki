@@ -159,7 +159,6 @@ function loop() {
       }
       const pb = getPlayerBox(player);
       for (const o of world.obstacles) {
-        if (o.userData.type === 'barricade' && player.sliding) continue;
         // 계단/지붕 표면 위에 올라타 있는 동안은 정지 기차와 충돌하지 않는다
         if (o.userData.type === 'static_train') {
           const surface = trainSurfaceHeight(o, player.mesh.position.z);
