@@ -7,37 +7,67 @@ export function createPlayer() {
   const group = new THREE.Group();
 
   const skin = new THREE.MeshLambertMaterial({ color: 0xffd1a8 });
-  const shirt = new THREE.MeshLambertMaterial({ color: 0xff69b4 });
-  const pants = new THREE.MeshLambertMaterial({ color: 0x8a2be2 });
+  const hair = new THREE.MeshLambertMaterial({ color: 0xff8fc0 });
+  const dress = new THREE.MeshLambertMaterial({ color: 0xff69b4 });
+  const accent = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  const shoeMat = new THREE.MeshLambertMaterial({ color: 0xe0408a });
 
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), skin);
   head.position.y = 1.4;
   group.add(head);
 
-  const ponytail = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.15), shirt);
-  ponytail.position.set(0, 1.3, -0.25);
+  // 머리카락: 머리를 덮는 캡 + 흔들리는 포니테일 (이름으로 찾아 애니메이션)
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), hair);
+  hairCap.position.set(0, 1.45, -0.05);
+  group.add(hairCap);
+
+  const ponytail = new THREE.Group();
+  ponytail.name = 'ponytail';
+  ponytail.position.set(0, 1.45, -0.22);
+  const tailSizes = [[0, -0.02, -0.06, 0.13], [0, -0.22, -0.12, 0.11], [0, -0.42, -0.16, 0.09]];
+  for (const [x, y, z, r] of tailSizes) {
+    const lump = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), hair);
+    lump.position.set(x, y, z);
+    ponytail.add(lump);
+  }
+  const tie = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.12), accent);
+  tie.position.set(0, 0.08, -0.04);
+  ponytail.add(tie);
   group.add(ponytail);
 
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), shirt);
-  torso.position.y = 0.9;
+  // 원피스: 몸통 + 퍼지는 치마
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.3), dress);
+  torso.position.y = 1.0;
   group.add(torso);
 
+  const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.48, 0.35, 12), dress);
+  skirt.position.y = 0.62;
+  group.add(skirt);
+
+  // 팔: 살구색 + 어깨 퍼프 소매 (팔에 붙여서 같이 흔들리게)
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), skin);
   armL.position.set(-0.32, 0.9, 0);
   armL.name = 'armL';
+  const sleeveL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), dress);
+  sleeveL.position.set(0, 0.22, 0);
+  armL.add(sleeveL);
   group.add(armL);
 
-  const armR = armL.clone();
+  const armR = armL.clone(true);
   armR.position.x = 0.32;
   armR.name = 'armR';
   group.add(armR);
 
-  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), pants);
+  // 다리: 살구색 + 분홍 신발 (다리에 붙여서 같이 흔들리게)
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), skin);
   legL.position.set(-0.12, 0.3, 0);
   legL.name = 'legL';
+  const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.28), shoeMat);
+  shoeL.position.set(0, -0.27, 0.05);
+  legL.add(shoeL);
   group.add(legL);
 
-  const legR = legL.clone();
+  const legR = legL.clone(true);
   legR.position.x = 0.12;
   legR.name = 'legR';
   group.add(legR);
@@ -128,4 +158,11 @@ export function updatePlayer(player, input, dt, groundY = 0) {
   if (armR) armR.rotation.x = -swing;
   if (legL) legL.rotation.x = -swing;
   if (legR) legR.rotation.x = swing;
+
+  // 포니테일은 절반 박자로 살랑살랑
+  const ponytail = player.mesh.getObjectByName('ponytail');
+  if (ponytail) {
+    ponytail.rotation.x = 0.15 + Math.sin(player.runTime * 0.5) * 0.18;
+    ponytail.rotation.z = Math.sin(player.runTime * 0.7) * 0.1;
+  }
 }
