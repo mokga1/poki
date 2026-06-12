@@ -38,6 +38,10 @@ let lastTime = performance.now();
 let score = 0;
 const scoreEl = document.getElementById('score');
 let gameOver = false;
+let started = false;
+const startEl = document.getElementById('startscreen');
+// 시작 화면에서 제자리 달리기용: 아무 입력도 없는 더미 입력
+const IDLE_INPUT = { wasJustPressed: () => false, isPressed: () => false };
 let elapsed = 0;
 const BASE_SPEED = 12;
 const MAX_SPEED = 30;
@@ -80,7 +84,14 @@ function loop() {
   const dt = Math.min((now - lastTime) / 1000, 0.05);
   lastTime = now;
 
-  if (!gameOver) {
+  if (!started) {
+    // 시작 화면: 세상은 멈춰 있고 캐릭터만 제자리 달리기
+    updatePlayer(player, IDLE_INPUT, dt, 0);
+    if (wasJustPressed('Space')) {
+      started = true;
+      startEl.classList.add('hide');
+    }
+  } else if (!gameOver) {
     elapsed += dt;
     const t = Math.min(elapsed / SPEED_RAMP_SECONDS, 1);
     world.speed = BASE_SPEED + (MAX_SPEED - BASE_SPEED) * t;
