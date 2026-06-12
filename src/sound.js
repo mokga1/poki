@@ -65,6 +65,13 @@ export function playSlide() {
   blip(500, ctx.currentTime, 0.15, 'sawtooth', 0.12, 180);
 }
 
+export function playPowerup() {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6 상승 아르페지오
+  notes.forEach((f, i) => blip(f, t + i * 0.07, 0.12, 'square', 0.22));
+}
+
 export function playGameOver() {
   if (!ctx) return;
   const t = ctx.currentTime;

@@ -3,7 +3,7 @@ import { isPressed, wasJustPressed, clearJustPressed } from './input.js';
 import { createPlayer, updatePlayer, getPlayerBox } from './player.js';
 import { createWorld, updateWorld, getSupportHeight, trainSurfaceHeight } from './world.js';
 import { createSky, updateSky } from './sky.js';
-import { initSound, playCoin, playJump, playSlide, playGameOver, startBgm, toggleMute } from './sound.js';
+import { initSound, playCoin, playJump, playSlide, playGameOver, playPowerup, startBgm, toggleMute } from './sound.js';
 
 const scene = new THREE.Scene();
 
@@ -42,6 +42,10 @@ let elapsed = 0;
 const BASE_SPEED = 12;
 const MAX_SPEED = 30;
 const SPEED_RAMP_SECONDS = 40;
+// 파워업 효과 남은 시간 (초). 0이면 비활성.
+const effects = { magnet: 0, star: 0, double: 0 };
+const POWERUP_DURATION = { magnet: 6, star: 5, double: 6 };
+let starTint = 0; // 무적 중 무지개 색 순환용
 const HIGH_KEY = 'poki_high_score';
 let highScore = Number(localStorage.getItem(HIGH_KEY) || 0);
 const highScoreEl = document.getElementById('high-score');
@@ -80,8 +84,27 @@ function loop() {
     elapsed += dt;
     const t = Math.min(elapsed / SPEED_RAMP_SECONDS, 1);
     world.speed = BASE_SPEED + (MAX_SPEED - BASE_SPEED) * t;
-    score += dt;
+    for (const k in effects) effects[k] = Math.max(0, effects[k] - dt);
+    const scoreMult = effects.double > 0 ? 2 : 1;
+    score += dt * scoreMult;
     updateWorld(world, dt);
+
+    // 자석: 근처 코인을 플레이어 쪽으로 끌어온다
+    if (effects.magnet > 0) {
+      for (const c of world.coins) {
+        if (!c.visible) continue;
+        const dx = player.mesh.position.x - c.position.x;
+        const dy = (player.mesh.position.y + 0.8) - c.position.y;
+        const dzc = player.mesh.position.z - c.position.z;
+        if (dx * dx + dy * dy + dzc * dzc < 6 * 6) {
+          const pull = Math.min(dt * 10, 1);
+          c.position.x += dx * pull;
+          c.position.y += dy * pull;
+          c.position.z += dzc * pull;
+        }
+      }
+    }
+
     const groundY = getSupportHeight(world, player.mesh.position.x, player.mesh.position.z);
     const wasJumping = player.jumping;
     const wasSliding = player.sliding;
@@ -96,26 +119,53 @@ function loop() {
       const dz = c.position.z - player.mesh.position.z;
       if (dx * dx + dy * dy + dz * dz < 0.8 * 0.8) {
         c.visible = false;
-        score += 10;
+        score += 10 * scoreMult;
         playCoin();
       }
     }
 
-    const pb = getPlayerBox(player);
-    for (const o of world.obstacles) {
-      if (o.userData.type === 'barricade' && player.sliding) continue;
-      // 계단/지붕 표면 위에 올라타 있는 동안은 정지 기차와 충돌하지 않는다
-      if (o.userData.type === 'static_train') {
-        const surface = trainSurfaceHeight(o, player.mesh.position.z);
-        if (surface > 0 && player.mesh.position.y >= surface - 0.01) continue;
-      }
-      if (boxOverlap(pb, getObstacleBox(o))) {
-        triggerGameOver();
-        break;
+    for (const p of world.powerups) {
+      if (!p.visible) continue;
+      const dx = p.position.x - player.mesh.position.x;
+      const dy = p.position.y - (player.mesh.position.y + 0.8);
+      const dzp = p.position.z - player.mesh.position.z;
+      if (dx * dx + dy * dy + dzp * dzp < 0.9 * 0.9) {
+        p.visible = false;
+        effects[p.userData.kind] = POWERUP_DURATION[p.userData.kind];
+        playPowerup();
       }
     }
 
-    scoreEl.textContent = Math.floor(score);
+    // 무적별 효과 중에는 충돌하지 않고 캐릭터가 무지개색으로 반짝인다
+    if (effects.star > 0) {
+      starTint = (starTint + dt * 1.5) % 1;
+      const tint = new THREE.Color().setHSL(starTint, 1, 0.55);
+      player.mesh.traverse(o => { if (o.isMesh) o.material.emissive.copy(tint); });
+    } else {
+      if (starTint !== 0) {
+        starTint = 0;
+        player.mesh.traverse(o => { if (o.isMesh) o.material.emissive.setHex(0x000000); });
+      }
+      const pb = getPlayerBox(player);
+      for (const o of world.obstacles) {
+        if (o.userData.type === 'barricade' && player.sliding) continue;
+        // 계단/지붕 표면 위에 올라타 있는 동안은 정지 기차와 충돌하지 않는다
+        if (o.userData.type === 'static_train') {
+          const surface = trainSurfaceHeight(o, player.mesh.position.z);
+          if (surface > 0 && player.mesh.position.y >= surface - 0.01) continue;
+        }
+        if (boxOverlap(pb, getObstacleBox(o))) {
+          triggerGameOver();
+          break;
+        }
+      }
+    }
+
+    let badges = '';
+    if (effects.magnet > 0) badges += ' 🧲';
+    if (effects.star > 0) badges += ' ⭐';
+    if (effects.double > 0) badges += ' x2';
+    scoreEl.textContent = Math.floor(score) + badges;
   }
 
   updateSky(sky, dt);
@@ -149,11 +199,20 @@ function triggerGameOver() {
 function resetGame() {
   for (const o of world.obstacles) scene.remove(o);
   for (const c of world.coins) scene.remove(c);
+  for (const p of world.powerups) scene.remove(p);
   world.obstacles = [];
   world.coins = [];
+  world.powerups = [];
   world.distanceSinceSpawn = 0;
   world.distanceSinceCoin = 0;
+  world.distanceSincePowerup = 0;
   world.speed = BASE_SPEED;
+
+  effects.magnet = 0;
+  effects.star = 0;
+  effects.double = 0;
+  starTint = 0;
+  player.mesh.traverse(o => { if (o.isMesh) o.material.emissive.setHex(0x000000); });
 
   player.lane = 1;
   player.jumping = false;

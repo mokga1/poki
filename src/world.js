@@ -19,9 +19,11 @@ export function createWorld(scene) {
     segments,
     obstacles: [],
     coins: [],
+    powerups: [],
     speed: 12,
     distanceSinceSpawn: 0,
     distanceSinceCoin: 0,
+    distanceSincePowerup: 0,
   };
 }
 
@@ -171,6 +173,28 @@ export function updateWorld(world, dt) {
     }
     return true;
   });
+
+  for (const p of world.powerups) {
+    p.position.z += dz;
+    p.rotation.y += dt * 2.5;
+  }
+  world.powerups = world.powerups.filter(p => {
+    if (p.position.z > DESPAWN_Z || !p.visible) {
+      world.scene.remove(p);
+      return false;
+    }
+    return true;
+  });
+
+  world.distanceSincePowerup += dz;
+  if (world.distanceSincePowerup >= 140) {
+    world.distanceSincePowerup = 0;
+    const kinds = ['magnet', 'star', 'double'];
+    const kind = kinds[Math.floor(Math.random() * kinds.length)];
+    const powerup = makePowerup(kind, Math.floor(Math.random() * 3));
+    world.powerups.push(powerup);
+    world.scene.add(powerup);
+  }
 
   world.distanceSinceCoin += dz;
   if (world.distanceSinceCoin >= 6) {
@@ -324,6 +348,35 @@ export function makeSign(lane) {
   group.position.set((lane - 1) * LANE_WIDTH, 1.05, SPAWN_DISTANCE);
   group.userData = { type: 'sign', lane, width: 1.8, height: 0.3, depth: 0.4 };
   return group;
+}
+
+const POWERUP_STYLE = {
+  magnet: { bg: '#ff8a9e', label: '🧲' },
+  star:   { bg: '#ffe066', label: '⭐' },
+  double: { bg: '#c59fff', label: 'x2' },
+};
+
+function makePowerup(kind, lane) {
+  // 종류별 아이콘을 캔버스에 그려 상자 텍스처로 사용 (외부 이미지 불필요)
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const c2d = canvas.getContext('2d');
+  const style = POWERUP_STYLE[kind];
+  c2d.fillStyle = style.bg;
+  c2d.fillRect(0, 0, 64, 64);
+  c2d.font = 'bold 36px sans-serif';
+  c2d.textAlign = 'center';
+  c2d.textBaseline = 'middle';
+  c2d.fillStyle = '#3a3a3a';
+  c2d.fillText(style.label, 32, 35);
+
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.55, 0.55, 0.55),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) }),
+  );
+  mesh.position.set((lane - 1) * LANE_WIDTH, 1.0, SPAWN_DISTANCE);
+  mesh.userData = { type: 'powerup', kind, lane };
+  return mesh;
 }
 
 function makeCoin(lane, z, y = 0.8) {
