@@ -9,6 +9,7 @@ export const LAYER_ORDER = [
   'underTop',
   'dress',
   'shoes',
+  'pupils',
   'eyes',
   'eyebrows',
   'eyelashes',

@@ -21,6 +21,7 @@ const MENU = [
   {
     id: 'face', icon: '💄', label: '페이스페인팅', tabs: [
       { label: '눈', slot: 'eyes', type: 'img', items: D.EYES, none: false, crop: 'head' },
+      { label: '눈동자', slot: 'pupils', type: 'img', items: D.PUPILS, none: false, crop: 'head' },
       { label: '눈썹', slot: 'eyebrows', type: 'img', items: D.EYEBROWS, none: true, crop: 'head' },
       { label: '속눈썹', slot: 'eyelashes', type: 'img', items: D.EYELASHES, none: true, crop: 'head' },
       { label: '입술', slot: 'mouth', type: 'img', items: D.MOUTHS, none: false, crop: 'head' },

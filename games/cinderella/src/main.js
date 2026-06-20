@@ -11,6 +11,7 @@ const doll = new Doll(stage);
 // --- 시작(누더기) 상태: 칙칙하고 단정치 못한 모습 ---
 doll.set('dress', D.DRESSES[0]);
 doll.setHair(D.HAIRS[0]);
+doll.set('pupils', D.PUPILS[0]);
 doll.set('eyes', D.EYES[0]);
 doll.set('eyebrows', D.EYEBROWS[0]);
 doll.set('mouth', D.MOUTHS[0]);
@@ -21,7 +22,7 @@ sound.initSound();
 // --- 먼지/흐림 오버레이: 충분히 꾸미면 걷힌다 ---
 const dust = document.getElementById('dust');
 const changed = new Set();
-const FACE = ['eyes', 'eyebrows', 'eyelashes', 'mouth', 'blush'];
+const FACE = ['eyes', 'pupils', 'eyebrows', 'eyelashes', 'mouth', 'blush'];
 const ACC = ['necklace', 'earrings', 'hands', 'headwear'];
 let cleaned = false;
 
