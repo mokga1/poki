@@ -2,88 +2,58 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>포키</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>놀이터 🎀</title>
   <style>
-    html, body { touch-action: none; overscroll-behavior: none; }
-    body { margin: 0; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
-    canvas { display: block; }
-    #score {
-      position: absolute; top: 20px; left: 20px;
-      font-size: 32px; font-weight: bold; color: #e0408a;
-      text-shadow: 2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white;
-      z-index: 10;
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #ffe3f1 0%, #e7ecff 60%, #fff6e0 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
     }
-    #gameover {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); color: white;
-      display: none; flex-direction: column; justify-content: center; align-items: center;
-      font-size: 28px; z-index: 20;
+    h1 {
+      font-size: 56px; margin: 0 0 8px; color: #e0408a;
+      text-shadow: 3px 3px 0 #fff, -2px -2px 0 #fff;
     }
-    #gameover.show { display: flex; }
-    #gameover h1 { font-size: 64px; margin: 0 0 20px; }
-    #gameover .hint { font-size: 20px; margin-top: 30px; opacity: 0.8; }
-    #startscreen {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      z-index: 30;
+    .subtitle { color: #8a6aa0; font-size: 20px; margin: 0 0 40px; }
+    .games { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+    .game-card {
+      width: 300px; height: 360px; border-radius: 28px;
+      background: #fff; text-decoration: none; color: inherit;
+      box-shadow: 0 10px 30px rgba(150, 90, 160, 0.25);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px; transition: transform .15s ease, box-shadow .15s ease;
+      border: 4px solid transparent;
     }
-    #startscreen.hide { display: none; }
-    #startscreen h1 {
-      font-size: 80px; margin: 0 0 24px; color: #e0408a;
-      text-shadow: 3px 3px 0 white, -3px -3px 0 white, 3px -3px 0 white, -3px 3px 0 white;
+    .game-card:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 18px 40px rgba(150, 90, 160, 0.35);
     }
-    #startscreen .card {
-      background: rgba(255, 255, 255, 0.85);
-      border-radius: 20px; padding: 24px 40px;
-      font-size: 22px; color: #6a4a7a; line-height: 1.9; text-align: center;
-      box-shadow: 0 6px 20px rgba(224, 64, 138, 0.25);
-    }
-    #startscreen .start-hint {
-      margin-top: 28px; font-size: 26px; font-weight: bold; color: #e0408a;
-      text-shadow: 2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white;
-      animation: pulse 1s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.08); opacity: 0.7; }
-    }
-    /* 폰처럼 좁은 화면에서는 글씨와 여백을 줄여서 안 깨지게 */
-    @media (max-width: 480px) {
-      #score { font-size: 26px; }
-      #startscreen h1 { font-size: 52px; margin-bottom: 16px; }
-      #startscreen .card { font-size: 15px; padding: 14px 18px; line-height: 1.8; max-width: 80vw; }
-      #startscreen .start-hint { font-size: 18px; margin-top: 20px; padding: 0 12px; text-align: center; }
-      #gameover { font-size: 22px; }
-      #gameover h1 { font-size: 44px; }
-    }
+    .game-card.runner:hover { border-color: #7fd4ff; }
+    .game-card.cinderella:hover { border-color: #f4a9c8; }
+    .emoji { font-size: 110px; line-height: 1; filter: drop-shadow(0 6px 8px rgba(0,0,0,.12)); }
+    .game-title { font-size: 30px; font-weight: bold; }
+    .game-desc { font-size: 16px; color: #9a7aab; padding: 0 20px; text-align: center; }
+    footer { margin-top: 40px; color: #b79ac6; font-size: 14px; }
   </style>
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-    }
-  }
-  </script>
 </head>
 <body>
-  <div id="score">0</div>
-  <div id="startscreen">
-    <h1>포키 🌈</h1>
-    <div class="card">
-      ← → &nbsp;차선 이동<br>
-      ↑ &nbsp;점프 &nbsp;&nbsp; ↓ &nbsp;슬라이드<br>
-      M &nbsp;소리 켜기/끄기<br>
-      📱 폰: 밀기로 이동·점프·슬라이드
-    </div>
-    <div class="start-hint">스페이스 키 또는 화면 터치로 시작!</div>
+  <h1>놀이터 🎀</h1>
+  <p class="subtitle">어떤 놀이를 할까요?</p>
+  <div class="games">
+    <a class="game-card runner" href="games/runner/index.html">
+      <div class="emoji">🌈</div>
+      <div class="game-title">포키 달리기</div>
+      <div class="game-desc">장애물을 피하며 멀리 달려요!</div>
+    </a>
+    <a class="game-card cinderella" href="games/cinderella/index.html">
+      <div class="emoji">👗</div>
+      <div class="game-title">신데렐라 꾸미기</div>
+      <div class="game-desc">예쁘게 꾸미고 무도회에 가요!</div>
+    </a>
   </div>
-  <div id="gameover">
-    <h1>GAME OVER</h1>
-    <div id="final-score">점수: 0</div>
-    <div id="high-score">최고 점수: 0</div>
-    <div class="hint">R 키 또는 화면 터치로 다시 시작</div>
-  </div>
-  <script type="module" src="./src/game.js"></script>
+  <footer>♡ 아빠가 만든 게임 ♡</footer>
 </body>
 </html>
