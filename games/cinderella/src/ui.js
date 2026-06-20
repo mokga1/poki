@@ -116,12 +116,16 @@ export function buildUI({ doll, sound, onPrince, onChange }) {
 
     if (tab.type === 'img') {
       const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.src = url(item);
       img.alt = '';
       cropStyle(img, tab.crop);
       view.appendChild(img);
     } else if (tab.type === 'hair') {
       const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.src = url(item.back);
       img.alt = '';
       cropStyle(img, tab.crop);
