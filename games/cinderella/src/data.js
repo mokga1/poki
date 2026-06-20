@@ -41,9 +41,16 @@ export const HANDS = ['ring', 'bracelet', 'bracelets', 'ankle bracelet', 'watch'
 
 // 페이스페인팅
 export const EYES = range(4).map((n) => FA + `eyes/${n}.png`);
-// 눈동자 (눈매 아래 레이어) - 색/모양 변형 a/b/c
-export const PUPILS = ['1a', '1b', '1c', '2a', '2b', '2c', '3a', '3b', '3c', '4a', '4b', '4c', '5a', '5b', '5c']
-  .map((s) => FA + `pupils/${s}.png`);
+// 눈동자 (눈매 아래 레이어). 색: a=초록, b=파랑, c=갈색.
+// 모양: 1·2=고양이눈(세로동공), 3·4=동그란눈, 5=별 반짝이.
+// 귀여운 동그란/반짝이 눈을 앞에, 고양이눈은 뒤로. 기본 = 5b(파랑 반짝이).
+export const PUPILS = [
+  '5b', '5a', '5c', // 별 반짝이 (파/초/갈)
+  '4b', '4a', '4c', // 동그란 눈
+  '3b', '3a', '3c',
+  '1b', '1a', '1c', // 고양이 눈
+  '2b', '2a', '2c',
+].map((s) => FA + `pupils/${s}.png`);
 export const EYEBROWS = range(10).map((n) => FA + `eyebrows/${n}.png`);
 export const EYELASHES = range(7).map((n) => FA + `eyelashes/${n}.png`);
 export const MOUTHS = range(14).map((n) => FA + `mouth/${n}.png`);
