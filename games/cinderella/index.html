@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>신데렐라 꾸미기 👗</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #ffe9f4 0%, #f0eaff 55%, #eafaff 100%);
+      display: flex; flex-direction: column;
+    }
+
+    /* 상단 바 */
+    #topbar {
+      height: 54px; flex: 0 0 auto; display: flex; align-items: center; gap: 14px;
+      padding: 0 16px; background: rgba(255,255,255,0.6); backdrop-filter: blur(4px);
+      border-bottom: 2px solid #f4c9e0;
+    }
+    #topbar .home { text-decoration: none; color: #b0508a; font-weight: bold; font-size: 16px; }
+    #topbar h1 { font-size: 22px; margin: 0; color: #e0408a; }
+    #topbar .spacer { flex: 1; }
+    #mute { font-size: 22px; background: none; border: none; cursor: pointer; }
+
+    /* 본문: 좌 버튼 / 중앙 인형 / 우 패널 */
+    #main { flex: 1; display: flex; min-height: 0; }
+
+    #buttons {
+      flex: 0 0 96px; display: flex; flex-direction: column; gap: 14px;
+      padding: 18px 10px; align-items: center; justify-content: center;
+    }
+    .mainbtn {
+      width: 76px; height: 76px; border-radius: 20px; border: 3px solid #f4c9e0;
+      background: #fff; cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+      box-shadow: 0 4px 10px rgba(200,120,170,0.2); transition: transform .12s, border-color .12s;
+    }
+    .mainbtn:hover { transform: translateY(-3px); }
+    .mainbtn.active { border-color: #e0408a; background: #fff0f8; }
+    .mainbtn .ic { font-size: 30px; line-height: 1; }
+    .mainbtn .lb { font-size: 12px; color: #a05a86; font-weight: bold; }
+
+    /* 인형 무대 */
+    #stage-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0;
+      position: relative;
+    }
+    #doll {
+      position: relative; height: 92%; aspect-ratio: 2 / 3;
+    }
+    #doll .layer {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; pointer-events: none;
+    }
+    #dust {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 40%, rgba(90,70,40,0.0) 30%, rgba(70,55,30,0.45) 100%),
+                 rgba(120,100,70,0.32);
+      mix-blend-mode: multiply; transition: opacity 1.2s ease; opacity: 1;
+    }
+    #dust.gone { opacity: 0; }
+
+    /* 우측 패널 */
+    #panel {
+      flex: 0 0 340px; display: flex; flex-direction: column; min-height: 0;
+      background: rgba(255,255,255,0.7); border-left: 2px solid #f4c9e0;
+    }
+    #tabs {
+      flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 6px; padding: 12px;
+      border-bottom: 1px solid #f0d4e6;
+    }
+    .tab {
+      padding: 6px 12px; border-radius: 16px; border: 2px solid #f0c4dc;
+      background: #fff; cursor: pointer; font-size: 14px; color: #a05a86;
+    }
+    .tab.active { background: #e0408a; color: #fff; border-color: #e0408a; }
+
+    #grid {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: grid; grid-template-columns: repeat(auto-fill, 86px);
+      gap: 10px; justify-content: center; align-content: start;
+    }
+    .cell {
+      width: 86px; height: 86px; border-radius: 14px; border: 2px solid #eecbe0;
+      background: #fff; cursor: pointer; padding: 0; overflow: hidden; position: relative;
+    }
+    .cell:hover { border-color: #f48fc0; }
+    .cell.selected { border-color: #e0408a; box-shadow: 0 0 0 3px rgba(224,64,138,0.25); }
+    .cell .view { position: absolute; inset: 0; overflow: hidden; }
+    .cell .view img, .cell .view svg { position: absolute; }
+    .cell.none { display: flex; align-items: center; justify-content: center; color: #c090b0; font-size: 13px; background: repeating-linear-gradient(45deg,#fff,#fff 6px,#fbeef6 6px,#fbeef6 12px); }
+
+    /* 토스트 */
+    #toast {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #e0408a; color: #fff; padding: 12px 22px; border-radius: 24px;
+      font-size: 16px; font-weight: bold; opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s; z-index: 50; box-shadow: 0 6px 18px rgba(224,64,138,0.4);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== 엔딩 ===== */
+    #ending { position: fixed; inset: 0; z-index: 100; overflow: hidden; }
+    #ending .ball-bg { position: absolute; inset: 0; }
+    #ending .ball-svg { width: 100%; height: 100%; }
+    #ending .couple {
+      position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center;
+      gap: 0; padding-bottom: 4vh;
+    }
+    #ending .prince { height: 72vh; transform-origin: bottom center; margin-right: -2vw; }
+    #ending .prince svg { height: 100%; width: auto; display: block; }
+    #ending .bride { height: 72vh; transform-origin: bottom center; margin-left: -2vw; }
+    #ending .doll-clone { position: relative; height: 100%; aspect-ratio: 2 / 3; }
+    #ending .doll-clone .layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    .sway-a { animation: swayA 3.2s ease-in-out infinite; }
+    .sway-b { animation: swayB 3.2s ease-in-out infinite; }
+    @keyframes swayA { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg) translateY(-10px); } }
+    @keyframes swayB { 0%,100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg) translateY(-10px); } }
+
+    #ending .ending-title {
+      position: absolute; top: 6%; left: 0; right: 0; text-align: center;
+      font-size: 52px; font-weight: bold; color: #fff;
+      text-shadow: 0 0 12px #ff9ed1, 2px 2px 0 #c0367f;
+    }
+    #ending .ending-sub {
+      position: absolute; top: 16%; left: 0; right: 0; text-align: center;
+      font-size: 22px; color: #ffe3f3; text-shadow: 1px 1px 3px #80305f;
+    }
+    #ending .ending-back {
+      position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+      padding: 14px 30px; font-size: 20px; font-weight: bold; color: #fff;
+      background: #e0408a; border: 3px solid #fff; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+    #ending .ending-back:hover { background: #f25aa0; }
+    #ending .petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #ending .petal { position: absolute; top: -6%; animation: fall linear infinite; }
+    @keyframes fall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
+    }
+
+    @media (max-width: 720px) {
+      #panel { flex-basis: 250px; }
+      #buttons { flex-basis: 74px; }
+      .mainbtn { width: 60px; height: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="topbar">
+    <a class="home" href="../../index.html">← 메뉴</a>
+    <h1>신데렐라 꾸미기 👗</h1>
+    <span class="spacer"></span>
+    <button id="mute" title="소리 켜기/끄기">🔊</button>
+  </div>
+
+  <div id="main">
+    <div id="buttons"></div>
+    <div id="stage-wrap">
+      <div id="doll"></div>
+      <div id="dust"></div>
+      <div id="toast"></div>
+    </div>
+    <div id="panel">
+      <div id="tabs"></div>
+      <div id="grid"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
