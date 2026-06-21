@@ -6,7 +6,8 @@ const MENU = [
   {
     id: 'wardrobe', icon: '👗', label: '옷장', tabs: [
       { label: '드레스', slot: 'dress', type: 'img', items: D.DRESSES, none: false, crop: 'full' },
-      { label: '머리', slot: 'hair', type: 'hair', items: D.HAIRS, none: false, crop: 'full' },
+      { label: '머리', slot: 'hairBack', type: 'img', items: D.HAIR_BACK, none: false, crop: 'head' },
+      { label: '앞머리', slot: 'hairBangs', type: 'img', items: D.BANGS, none: true, crop: 'head' },
       { label: '신발', slot: 'shoes', type: 'img', items: D.SHOES, none: true, crop: 'feet' },
       { label: '면사포', slot: 'headwear', type: 'svg', items: D.HEADWEAR, none: false, crop: 'head' },
     ],

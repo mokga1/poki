@@ -10,7 +10,8 @@ const doll = new Doll(stage);
 
 // --- 시작(누더기) 상태: 칙칙하고 단정치 못한 모습 ---
 doll.set('dress', D.DRESSES[0]);
-doll.setHair(D.HAIRS[0]);
+doll.set('hairBack', D.HAIR_BACK[0]);
+doll.set('hairBangs', D.BANGS[0]);
 doll.set('pupils', D.PUPILS[0]);
 doll.set('eyes', D.EYES[0]);
 doll.set('eyebrows', D.EYEBROWS[0]);
@@ -31,7 +32,8 @@ function onChange(slot) {
   if (cleaned) return;
   const hasFace = FACE.some((s) => changed.has(s));
   const hasAcc = ACC.some((s) => changed.has(s));
-  if (changed.has('dress') && changed.has('hair') && hasFace && hasAcc) {
+  const hasHair = changed.has('hairBack') || changed.has('hairBangs');
+  if (changed.has('dress') && hasHair && hasFace && hasAcc) {
     cleaned = true;
     dust.classList.add('gone');
     showToast('와, 예뻐졌어요! 🤴 왕자 버튼을 눌러보세요 💖');

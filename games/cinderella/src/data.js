@@ -22,11 +22,11 @@ export const DRESSES = [
   ...['1', '2', '3', '3b', '5'].map((n) => O + `dress/${n}.png`),
 ];
 
-// 옷장 - 머리 (앞머리 + 뒷머리 한 세트)
-export const HAIRS = range(10).map((n) => ({
-  bangs: F + `hair (bangs)/${n}.webp`,
-  back: F + `hair (back)/${n}a.webp`,
-}));
+// 옷장 - 머리
+// hair (back)/Na = 앞에서 볼 때 머리(앞면), Nb = 뒤에서 볼 때(뒤통수). 앞면(a)만 사용.
+export const HAIR_BACK = range(10).map((n) => F + `hair (back)/${n}a.webp`);
+// 앞머리(프린지) - 따로 선택
+export const BANGS = range(10).map((n) => F + `hair (bangs)/${n}.webp`);
 
 // 옷장 - 신발
 export const SHOES = [
