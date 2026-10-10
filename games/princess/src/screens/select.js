@@ -6,7 +6,7 @@ import { newGame } from '../rules.js';
 import { modal, sparkles, esc } from '../ui.js';
 import { sfx } from '../sound.js';
 
-export function render(root, ctx) {
+export function render(root, ctx, { slot = 0 } = {}) {
   let picked = 'ruby';
   root.innerHTML = `${selectBg()}
     <button class="home title-back" data-back>← 처음으로</button>
@@ -63,6 +63,7 @@ export function render(root, ctx) {
     });
     if (res !== 'ok') return;
     ctx.state = newGame(picked, name);
+    ctx.state.slot = slot;
     ctx.save();
     ctx.go('home');
   });

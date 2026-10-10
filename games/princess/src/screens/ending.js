@@ -32,7 +32,7 @@ export async function render(root, ctx) {
   const en = ENDINGS.find((e) => e.id === id);
   const isNew = !loadGallery().includes(id);
   addToGallery(id);
-  clearSave();
+  clearSave(s.slot ?? 0);
   const e = effStats(s);
 
   const look = { outfit: en.outfit, hat: en.hat, weapon: id === 'hero' || id === 'knight' ? 'knight' : id === 'wizard' ? 'starwand' : null, acc: null };

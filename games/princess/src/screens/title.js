@@ -2,9 +2,8 @@
 import { titleBg, CROWN_SVG } from '../art/scenes.js';
 import { avatar } from '../art/avatar.js';
 import { CHARACTERS } from '../data/characters.js';
-import { hasSave, load, clearSave } from '../state.js';
-import { MAX_MONTH } from '../rules.js';
-import { modal, sparkles } from '../ui.js';
+import { hasSave } from '../state.js';
+import { sparkles } from '../ui.js';
 import { sfx, music } from '../sound.js';
 
 export function render(root, ctx) {
@@ -24,26 +23,11 @@ export function render(root, ctx) {
     </div>`;
   sparkles(root, 18);
 
-  root.querySelector('.title-btns').addEventListener('click', async (e) => {
+  root.querySelector('.title-btns').addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (!act) return;
     sfx('click');
-    if (act === 'continue') {
-      ctx.state = load();
-      ctx.go(ctx.state.month > MAX_MONTH ? 'ending' : 'home');
-    } else if (act === 'gallery') {
-      ctx.go('gallery', { back: 'title' });
-    } else if (act === 'new') {
-      if (saved) {
-        const ok = await modal({
-          title: '처음부터 할까요?',
-          html: '지금까지 키운 공주님의 기록이 지워져요.<br>(엔딩 도감은 그대로 남아요)',
-          buttons: [{ id: 'yes', label: '새로 시작' }, { id: 'no', label: '취소', kind: 'sub' }],
-        });
-        if (ok !== 'yes') return;
-        clearSave();
-      }
-      ctx.go('select');
-    }
+    if (act === 'gallery') ctx.go('gallery', { back: 'title' });
+    else ctx.go('slots', { mode: act }); // 'new' | 'continue' → 저장 칸 고르기
   });
 }

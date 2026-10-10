@@ -9,13 +9,14 @@ import * as adventure from './screens/adventure.js';
 import * as battle from './screens/battle.js';
 import * as ending from './screens/ending.js';
 import * as gallery from './screens/gallery.js';
+import * as slots from './screens/slots.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
 import { installStory } from './story.js';
 import { chooseActivity, chooseRegion, talkToLulu, runEvents } from './flow.js';
 
-const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle, ending, gallery };
+const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle, ending, gallery, slots };
 
 const ctx = {
   state: null,
