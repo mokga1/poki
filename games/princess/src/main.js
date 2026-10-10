@@ -10,6 +10,7 @@ import * as battle from './screens/battle.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
+import { installStory } from './story.js';
 import { chooseActivity, chooseRegion, talkToLulu, runEvents } from './flow.js';
 
 const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle };
@@ -55,4 +56,5 @@ const actions = {
 window.princess = ctx;
 
 initSound();
+installStory();
 ctx.go('title');

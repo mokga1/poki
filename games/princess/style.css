@@ -361,3 +361,23 @@ button.chip { cursor: pointer; }
 .cmds .mbtn small { font-size: 12px; opacity: .9; }
 .cmds.sub .mbtn .e { font-size: 26px; }
 .bt-hp::before, .bt-hp::after, .adv-panel::before, .adv-panel::after { display: none; }
+
+/* ---------- 대화창 ---------- */
+.dlg-back { position: absolute; inset: 0; pointer-events: auto; cursor: pointer;
+  background: linear-gradient(180deg, rgba(255,230,242,0) 35%, rgba(120,60,100,.35) 100%); animation: fadeIn .25s ease both; }
+.dlg-box { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); width: min(1100px, 94vw); min-height: 150px; padding: 30px 34px 22px 230px; }
+.dlg-name { position: absolute; top: -20px; left: 220px; font-family: 'Jua'; font-size: 22px; color: #fff; padding: 4px 22px; border-radius: 16px;
+  background: linear-gradient(180deg,#ff8fbf,#ec4f94); border: 3px solid #fff; box-shadow: 0 4px 0 #c33a78; }
+.dlg-text { font-size: 22px; line-height: 1.65; color: #6a3557; min-height: 72px; }
+.dlg-text b { color: #ee4f96; font-family: 'Jua'; font-weight: normal; }
+.dlg-next { position: absolute; right: 24px; bottom: 12px; color: #ec4f94; font-size: 18px; animation: float 1s ease-in-out infinite; }
+.dlg-choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.dlg-choices .pill { font-size: 18px; padding: 8px 22px; }
+.dlg-portrait { position: absolute; left: max(3vw, calc(50% - 550px)); bottom: 3%; width: 210px; height: 260px; z-index: 2; pointer-events: none; }
+.dlg-portrait svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 6px 10px rgba(120,60,100,.3)); }
+.dlg-portrait.princess { height: 300px; }
+.dlg-portrait.lulu, .dlg-portrait.nyang, .dlg-portrait.leo, .dlg-portrait.momo, .dlg-portrait.kong { width: 200px; height: 200px; bottom: calc(3% + 40px); }
+.dlg-portrait.boss { width: 200px; height: 200px; bottom: calc(3% + 60px); }
+.dlg-portrait.none { display: none; }
+.dlg-pic { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); font-size: 110px; filter: drop-shadow(0 8px 12px rgba(120,60,100,.25)); pointer-events: none; }
+.dlg-pic span { display: inline-block; }

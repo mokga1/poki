@@ -17,7 +17,8 @@ export async function startMonth(ctx) {
   if (s.startedMonth === s.month) return;
   s.startedMonth = s.month;
   ctx.save();
-  await runEvents(ctx, 'monthStart');
+  const ran = await runEvents(ctx, 'monthStart');
+  if (ran) { ctx.save(); if (!s.sick) ctx.go('home'); } // 선물·보석 표시를 새로 그린다
   if (s.sick) {
     await modal({
       title: '열이 나요 🤒',
