@@ -243,3 +243,55 @@ button.chip { cursor: pointer; }
 .act-result .note { margin: 0; font-size: 15px; color: #d04070; text-align: center; min-height: 0; }
 .act-result .note:empty { display: none; }
 .act-result .pill { align-self: center; margin-top: 4px; }
+
+/* ---------- 상점 / 장비 ---------- */
+.shop-stage { position: absolute; left: 0; top: 64px; bottom: 0; width: 38%; }
+.shop-stage .avatar-wrap { position: absolute; left: 50%; bottom: 10%; width: min(88%, calc((100vh - 64px) * .46)); transform: translateX(-50%); aspect-ratio: 300/420; }
+.shop-stage .avatar-wrap svg { width: 100%; height: 100%; overflow: visible; }
+.shop-hint { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); }
+.shop-panel { position: absolute; right: 2.2%; top: calc(64px + 4%); bottom: 3%; width: 58%; padding: 28px 18px 14px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.tab { font-family: 'Jua'; font-size: 17px; padding: 6px 16px; border-radius: 16px; border: 3px solid #f7c3da; background: #fff; color: #b04880; cursor: pointer; }
+.tab.on { background: linear-gradient(180deg,#ff8fbf,#ec4f94); color: #fff; border-color: #fff; box-shadow: 0 3px 0 #c33a78; }
+.igrid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; align-content: start; padding: 6px; }
+.icard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px 8px; cursor: pointer;
+  background: linear-gradient(180deg,#fff,#fff4f9); border: 3px solid #f7c3da; border-radius: 18px; transition: transform .12s, border-color .12s; }
+.icard:hover { transform: translateY(-3px); border-color: #ee5a9b; }
+.icard.on { border-color: #ffc94d; box-shadow: 0 0 0 3px rgba(255,201,77,.5); }
+.icard .ico { width: 78px; height: 78px; display: grid; place-items: center; }
+.icard .ico svg { width: 100%; height: 100%; overflow: visible; }
+.icard .in { font-family: 'Jua'; font-size: 16px; color: #8a4470; }
+.icard .ip { font-family: 'Jua'; font-size: 14px; color: #b07a10; }
+.icard.owned .ip { color: #2f9a62; }
+.icard .cnt, .icard .worn { position: absolute; top: 6px; right: 6px; font-family: 'Jua'; font-size: 12px; background: #ec4f94; color: #fff; padding: 1px 7px; border-radius: 8px; }
+.icard .worn { background: #ffc94d; color: #8a5a00; }
+.detail { min-height: 74px; display: flex; align-items: center; gap: 14px; justify-content: space-between; background: #fff; border: 3px dashed #f7c3da; border-radius: 18px; padding: 10px 16px; }
+.detail .dtext { display: flex; flex-direction: column; gap: 2px; }
+.detail b { font-family: 'Jua'; font-weight: normal; font-size: 21px; color: #c0508c; }
+.detail .dbonus { font-family: 'Jua'; color: #2f9a62; font-size: 16px; }
+.detail .ddesc { font-size: 14px; color: #8a6a7a; }
+.detail .dhint { margin: 0 auto; color: #a07090; }
+.detail .pill { font-size: 18px; padding: 8px 22px; white-space: nowrap; }
+.pill.off { filter: grayscale(.9); opacity: .7; cursor: not-allowed; }
+.buy-ico { width: 110px; height: 110px; margin: 0 auto 6px; }
+.buy-ico svg { width: 100%; height: 100%; overflow: visible; }
+
+.equip-panel { gap: 12px; }
+.slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.slot { background: #fff; border: 3px solid #f7c3da; border-radius: 18px; padding: 6px; display: flex; flex-direction: column; align-items: center; }
+.slot .sl { font-family: 'Jua'; font-size: 14px; color: #fff; background: #ec4f94; border-radius: 10px; padding: 0 10px; }
+.slot .ico { width: 64px; height: 64px; display: grid; place-items: center; }
+.slot .ico svg { width: 100%; height: 100%; overflow: visible; }
+.slot .none { color: #c9a0b8; font-size: 14px; }
+.slot .sn { font-family: 'Jua'; font-size: 14px; color: #8a4470; }
+.bstats { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-family: 'Jua'; font-size: 16px; color: #8a4470; background: #fff7fb; border-radius: 14px; padding: 6px 10px; }
+.bstats b { font-weight: normal; color: #c0508c; }
+.bstats em { font-style: normal; margin-left: 3px; font-size: 14px; }
+.bstats em.up { color: #2fa866; } .bstats em.down { color: #d04070; }
+.owned { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.orow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.orow > .sl { font-family: 'Jua'; width: 74px; color: #b04880; }
+.orow .empty { color: #b9a0b0; font-size: 14px; }
+.icard.small { width: 104px; padding: 6px 4px; }
+.icard.small .ico { width: 54px; height: 54px; }
+.icard.small .in { font-size: 13px; }

@@ -3,12 +3,14 @@ import * as title from './screens/title.js';
 import * as select from './screens/select.js';
 import * as home from './screens/home.js';
 import * as activity from './screens/activity.js';
+import * as shop from './screens/shop.js';
+import * as equipScreen from './screens/equip.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
 import { chooseActivity, talkToLulu } from './flow.js';
 
-const screens = { title, select, home, activity };
+const screens = { title, select, home, activity, shop, equip: equipScreen };
 
 const ctx = {
   state: null,
@@ -37,6 +39,8 @@ const actions = {
   study: () => chooseActivity(ctx, 'study'),
   job: () => chooseActivity(ctx, 'job'),
   rest: () => chooseActivity(ctx, 'rest'),
+  shop: () => ctx.go('shop'),
+  equip: () => ctx.go('equip'),
   talk: () => talkToLulu(ctx, home.luluAdvice(ctx.state)),
 };
 

@@ -68,6 +68,18 @@ export function sparkles(container, n = 14) {
   }
 }
 
+// 아이템 효과 글: "공격 +3 · 매력 +10"
+const BONUS_NAMES = { atk: '공격', matk: '마법', def: '방어', maxHp: '최대HP', maxMp: '최대MP' };
+export function bonusText(item) {
+  if (item.heal) return item.heal >= 999 ? 'HP 전부 회복' : `HP +${item.heal} 회복`;
+  if (item.mana) return `MP +${item.mana} 회복`;
+  return Object.entries(item.bonus || {}).map(([k, v]) => {
+    if (k === 'flee') return `도망 +${Math.round(v * 100)}%`;
+    if (k === 'goldRate') return `버는 돈 +${Math.round(v * 100)}%`;
+    return `${BONUS_NAMES[k] || STAT_NAMES[k]} +${v}`;
+  }).join(' · ');
+}
+
 // 받침에 맞는 조사: josa('루비', '이') → '루비가', josa('하랑', '이') → '하랑이'
 const JOSA = { 이: ['이', '가'], 은: ['은', '는'], 을: ['을', '를'], 과: ['과', '와'], 아: ['아', '야'], 이랑: ['이랑', '랑'], 이에요: ['이에요', '예요'] };
 export function josa(word, key) {
