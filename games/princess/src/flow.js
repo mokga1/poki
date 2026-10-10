@@ -1,6 +1,9 @@
 // 한 달의 흐름: 달 시작(이벤트·병) → 활동 → 달 끝(이벤트) → 다음 달 / 엔딩
 import { ACTIVITIES, CATEGORIES } from './data/activities.js';
-import { applyActivity, canAfford, recover, advanceMonth, STAT_NAMES } from './rules.js';
+import { applyActivity, canAfford, recover, advanceMonth, battleStats, STAT_NAMES } from './rules.js';
+import { REGIONS, GEM_INFO } from './data/regions.js';
+import { ENEMIES } from './data/enemies.js';
+import { newTrip } from './screens/adventure.js';
 import { modal, toast, fillName } from './ui.js';
 import { sfx } from './sound.js';
 
@@ -64,6 +67,30 @@ export async function doActivity(ctx, act) {
   // 여기서는 저장하지 않는다: 연출 중에 새로고침하면 그 달을 처음부터 다시 고르게 (달이 넘어갈 때 저장)
   const res = applyActivity(s, act);
   await new Promise((done) => ctx.go('activity', { act, res, done }));
+  await endMonth(ctx);
+}
+
+// 무사수행: 지역 고르기 → 모험 보드 → 달 끝
+const BOSS_LEVEL = { forest: 4, cave: 7, ice: 10, tower: 12 };
+export async function chooseRegion(ctx) {
+  const s = ctx.state;
+  const id = await modal({
+    title: '⚔️ 어디로 모험을 떠날까요?',
+    html: `<div class="pick-grid regions">${REGIONS.map((r) => {
+      const open = r.need(s);
+      const has = s.gems.includes(r.gem);
+      return `<button class="pick ${open ? '' : 'off'}" data-close="${r.id}">
+        <span class="pi">${open ? r.icon : '🔒'}</span><span class="pn">${r.name}</span>
+        <span class="pg">${open ? `보스: ${ENEMIES[r.boss].name}<br>권장 레벨 ${BOSS_LEVEL[r.id]}` : r.lock}</span>
+        ${has ? `<span class="free">⭐ ${GEM_INFO[r.gem].name} 획득</span>` : open ? `<span class="cost">${GEM_INFO[r.gem].name}이 있어요</span>` : ''}
+      </button>`;
+    }).join('')}</div>`,
+    buttons: [{ id: 'cancel', label: '그만두기', kind: 'sub' }],
+  });
+  if (!id || id === 'cancel') return;
+  const b = battleStats(s);
+  s.hp = b.maxHp; s.mp = b.maxMp;
+  await new Promise((done) => ctx.go('adventure', { trip: newTrip(id, done) }));
   await endMonth(ctx);
 }
 

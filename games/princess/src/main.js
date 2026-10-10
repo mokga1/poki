@@ -5,12 +5,14 @@ import * as home from './screens/home.js';
 import * as activity from './screens/activity.js';
 import * as shop from './screens/shop.js';
 import * as equipScreen from './screens/equip.js';
+import * as adventure from './screens/adventure.js';
+import * as battle from './screens/battle.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
-import { chooseActivity, talkToLulu } from './flow.js';
+import { chooseActivity, chooseRegion, talkToLulu, runEvents } from './flow.js';
 
-const screens = { title, select, home, activity, shop, equip: equipScreen };
+const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle };
 
 const ctx = {
   state: null,
@@ -27,6 +29,10 @@ const ctx = {
   save() {
     if (ctx.state) save(ctx.state);
   },
+  // 이야기 이벤트 실행 (예: 보스를 이긴 뒤 'bossWin')
+  runEvents(hook, data) {
+    return runEvents(ctx, hook, data);
+  },
   // 메인 화면 버튼(공부·상점 등)이 부르는 동작들
   action(kind) {
     const f = actions[kind];
@@ -39,6 +45,7 @@ const actions = {
   study: () => chooseActivity(ctx, 'study'),
   job: () => chooseActivity(ctx, 'job'),
   rest: () => chooseActivity(ctx, 'rest'),
+  adventure: () => chooseRegion(ctx),
   shop: () => ctx.go('shop'),
   equip: () => ctx.go('equip'),
   talk: () => talkToLulu(ctx, home.luluAdvice(ctx.state)),
