@@ -445,3 +445,14 @@ button.chip { cursor: pointer; }
 .slot-card.empty .plus { font-family: 'Jua'; font-size: 80px; line-height: 1; color: #f4a3c6; }
 .slot-card.off { cursor: default; filter: saturate(.4); }
 .slot-card.off:hover { transform: none; }
+
+/* ---------- 태블릿 ---------- */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+#rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate { display: flex; position: fixed; inset: 0; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    background: linear-gradient(160deg, #ffe3f1, #e7ecff); font-family: 'Jua'; color: #ee4f96; font-size: 30px; text-align: center; padding: 24px; }
+  #rotate .ph { font-size: 90px; animation: turn 2s ease-in-out infinite; }
+  #rotate small { font-family: 'Gowun Dodum'; font-size: 18px; color: #9a5480; }
+}
+@keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
