@@ -2,11 +2,13 @@
 import * as title from './screens/title.js';
 import * as select from './screens/select.js';
 import * as home from './screens/home.js';
+import * as activity from './screens/activity.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
+import { chooseActivity, talkToLulu } from './flow.js';
 
-const screens = { title, select, home };
+const screens = { title, select, home, activity };
 
 const ctx = {
   state: null,
@@ -31,7 +33,12 @@ const ctx = {
   },
 };
 
-const actions = {};
+const actions = {
+  study: () => chooseActivity(ctx, 'study'),
+  job: () => chooseActivity(ctx, 'job'),
+  rest: () => chooseActivity(ctx, 'rest'),
+  talk: () => talkToLulu(ctx, home.luluAdvice(ctx.state)),
+};
 
 // 콘솔에서 상태를 살펴볼 수 있게 (확인용)
 window.princess = ctx;

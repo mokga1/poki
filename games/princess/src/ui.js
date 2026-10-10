@@ -68,5 +68,17 @@ export function sparkles(container, n = 14) {
   }
 }
 
-export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// 받침에 맞는 조사: josa('루비', '이') → '루비가', josa('하랑', '이') → '하랑이'
+const JOSA = { 이: ['이', '가'], 은: ['은', '는'], 을: ['을', '를'], 과: ['과', '와'], 아: ['아', '야'], 이랑: ['이랑', '랑'], 이에요: ['이에요', '예요'] };
+export function josa(word, key) {
+  const c = word.charCodeAt(word.length - 1);
+  const batchim = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return word + JOSA[key][batchim ? 0 : 1];
+}
+// "{name}의 꿈" / "{name이} 웃었어요" 처럼 이름과 조사를 채운다. 이름은 HTML 안전하게 바꾼다.
+export function fillName(text, name) {
+  return text.replace(/\{name(이랑|이에요|이|은|을|과|아)?\}/g, (_, k) => esc(k ? josa(name, k) : name));
+}
+
+export const wait =(ms) => new Promise((r) => setTimeout(r, ms));
 export const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

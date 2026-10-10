@@ -6,6 +6,7 @@ import { dateInfo, effStats, STAT_NAMES, MAX_MONTH } from '../rules.js';
 import { REGIONS, GEM_INFO } from '../data/regions.js';
 import { sparkles, esc } from '../ui.js';
 import { sfx, music, toggleMute, isMuted } from '../sound.js';
+import { startMonth } from '../flow.js';
 
 const STAT_STYLE = {
   vit: ['❤️', '#ff7f9e', '#ffb8c9'], str: ['💪', '#ff8a4c', '#ffc39b'], int: ['📖', '#4c9dff', '#a8d1ff'], mgc: ['🔮', '#9b6cff', '#cfbaff'],
@@ -101,4 +102,6 @@ export function render(root, ctx) {
     if (act === 'mute') { e.target.closest('button').textContent = toggleMute() ? '🔇' : '🔊'; return; }
     ctx.action(act);
   });
+
+  startMonth(ctx);
 }

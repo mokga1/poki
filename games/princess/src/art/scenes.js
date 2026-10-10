@@ -1,8 +1,8 @@
 // 배경 그림들 (viewBox 1600x900, 화면을 꽉 채우도록 slice)
-const wrap = (inner, defs = '') =>
+export const wrap = (inner, defs = '') =>
   `<svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${inner}</svg>`;
 
-const cloud = (x, y, s = 1, op = 0.9) =>
+export const cloud = (x, y, s = 1, op = 0.9) =>
   `<g transform="translate(${x} ${y}) scale(${s})" fill="#fff" opacity="${op}"><ellipse rx="110" ry="36"/><ellipse cx="60" cy="-20" rx="66" ry="42"/><ellipse cx="-52" cy="-16" rx="52" ry="32"/></g>`;
 
 function tower(x, y, w, h, roof) {
@@ -162,7 +162,7 @@ export function particles(season, n = 16) {
     `<i style="left:${(Math.random() * 100).toFixed(1)}%;animation-duration:${(7 + Math.random() * 7).toFixed(1)}s;animation-delay:${(-Math.random() * 14).toFixed(1)}s;--dx:${Math.round(Math.random() * 160 - 60)}px">${shape()}</i>`).join('')}</div>`;
 }
 
-export const CROWN_SVG =`<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+export const CROWN_SVG = `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
   <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3a8"/><stop offset="1" stop-color="#f2b632"/></linearGradient></defs>
   <path d="M10 70 L6 22 L34 44 L60 8 L86 44 L114 22 L110 70Z" fill="url(#cg)" stroke="#e6a92a" stroke-width="3" stroke-linejoin="round"/>
   <circle cx="60" cy="8" r="7" fill="#ff6fa5" stroke="#fff" stroke-width="2"/><circle cx="6" cy="22" r="5" fill="#7fd0ff" stroke="#fff" stroke-width="2"/><circle cx="114" cy="22" r="5" fill="#7fd0ff" stroke="#fff" stroke-width="2"/>
