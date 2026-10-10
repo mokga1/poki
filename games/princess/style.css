@@ -413,3 +413,15 @@ button.chip { cursor: pointer; }
 .gcard .gt { font-family: 'Jua'; font-size: 15px; color: #b04880; text-align: center; line-height: 1.2; }
 .gcard .gh { font-size: 11px; color: #a08898; text-align: center; line-height: 1.3; margin-top: 2px; }
 .gtext { font-size: 18px; line-height: 1.75; max-width: 520px; margin: 0; }
+
+/* 낮은 화면(노트북·태블릿 가로)용 촘촘한 배치 */
+@media (max-height: 720px) {
+  .side { gap: 22px; top: calc(64px + 2.5%); bottom: 2%; }
+  .stats { padding: 22px 18px 8px; }
+  .stat { margin: 2px 0; font-size: 15px; }
+  .stat .ic { width: 26px; height: 26px; font-size: 14px; }
+  .menu { padding: 24px 14px 12px; gap: 10px; }
+  .menu .mbtn { max-height: 12vh; font-size: 14px; }
+  .menu .mbtn .e { font-size: 26px; }
+  .bubble { font-size: 15px; }
+}

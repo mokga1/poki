@@ -15,10 +15,10 @@ export function setEventRunner(fn) { runEvents = fn; }
 export async function startMonth(ctx) {
   const s = ctx.state;
   if (s.startedMonth === s.month) return;
-  s.startedMonth = s.month;
-  ctx.save();
+  s.startedMonth = s.month; // 같은 달에 다시 불려도 한 번만 (저장은 이벤트가 끝난 뒤: 도중에 새로고침하면 다시 본다)
   const ran = await runEvents(ctx, 'monthStart');
-  if (ran) { ctx.save(); if (!s.sick) ctx.go('home'); } // 선물·보석 표시를 새로 그린다
+  ctx.save();
+  if (ran && !s.sick) ctx.go('home'); // 선물·보석 표시를 새로 그린다
   if (s.sick) {
     await modal({
       title: '열이 나요 🤒',
