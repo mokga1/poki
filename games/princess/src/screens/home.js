@@ -2,7 +2,7 @@
 import { room, particles } from '../art/scenes.js';
 import { avatar } from '../art/avatar.js';
 import { LULU } from '../art/npcs.js';
-import { dateInfo, effStats, STAT_NAMES, MAX_MONTH } from '../rules.js';
+import { dateInfo, effStats, STAT_NAMES, MAX_MONTH, STAT_MAX } from '../rules.js';
 import { REGIONS, GEM_INFO } from '../data/regions.js';
 import { sparkles, esc } from '../ui.js';
 import { sfx, music, toggleMute, isMuted } from '../sound.js';
@@ -83,8 +83,8 @@ export function render(root, ctx) {
           const [ic, c, c2] = STAT_STYLE[k];
           const bonus = eff[k] - s.stats[k];
           return `<div class="stat" style="--c:${c};--c2:${c2}"><span class="ic">${ic}</span>${STAT_NAMES[k]}
-            <div class="bar"><i style="width:${Math.min(100, eff[k])}%"></i></div>
-            <span class="num">${s.stats[k]}${bonus ? `<em>+${bonus}</em>` : ''}</span></div>`;
+            <div class="bar"><i style="width:${Math.min(100, (eff[k] / (k === 'fat' ? 100 : STAT_MAX)) * 100)}%"></i></div>
+            <span class="num">${k !== 'fat' && s.stats[k] >= STAT_MAX ? '<span class="max">MAX ✨</span>' : s.stats[k]}${bonus ? `<em>+${bonus}</em>` : ''}</span></div>`;
         }).join('')}
       </div>
       <div class="frame menu">

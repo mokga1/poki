@@ -1,6 +1,6 @@
 // 한 달의 흐름: 달 시작(이벤트·병) → 활동 → 달 끝(이벤트) → 다음 달 / 엔딩
 import { ACTIVITIES, CATEGORIES } from './data/activities.js';
-import { applyActivity, canAfford, recover, advanceMonth, battleStats, STAT_NAMES } from './rules.js';
+import { applyActivity, canAfford, recover, advanceMonth, battleStats, maxedGains, STAT_NAMES } from './rules.js';
 import { REGIONS, GEM_INFO } from './data/regions.js';
 import { ENEMIES } from './data/enemies.js';
 import { newTrip } from './screens/adventure.js';
@@ -51,10 +51,11 @@ export async function chooseActivity(ctx, cat) {
     cls: 'pick-modal',
     html: `<div class="pick-grid">${list.map((a) => {
       const ok = canAfford(s, a);
+      const maxed = maxedGains(s, a);
       const money = a.income ? `<span class="earn">+${a.income} G</span>` : a.cost ? `<span class="${ok ? 'cost' : 'cost no'}">-${a.cost} G</span>` : '<span class="free">무료</span>';
       return `<button class="pick ${ok ? '' : 'off'}" data-close="${a.id}">
         <span class="pi">${a.icon}</span><span class="pn">${a.name}</span><span class="pg">${fmtGain(a)}</span>${money}
-        ${ok ? '' : '<span class="nomoney">돈이 부족해요</span>'}</button>`;
+        ${ok ? '' : '<span class="nomoney">돈이 부족해요</span>'}${maxed.length ? `<span class="maxed">${maxed.map((k) => STAT_NAMES[k]).join('·')} MAX ✨</span>` : ''}</button>`;
     }).join('')}</div>`,
     buttons: [{ id: 'cancel', label: '그만두기', kind: 'sub' }],
   });

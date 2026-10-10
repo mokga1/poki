@@ -1,7 +1,7 @@
 // 활동 결과 연출: 장면 → "첫째 주… 넷째 주!" → 능력치 결과
 import { activityScene, ACT_LOOK } from '../art/activityScenes.js';
 import { avatar } from '../art/avatar.js';
-import { STAT_NAMES } from '../rules.js';
+import { STAT_NAMES, maxedGains } from '../rules.js';
 import { popNumbers, sparkles, wait } from '../ui.js';
 import { sfx } from '../sound.js';
 
@@ -23,10 +23,10 @@ export function render(root, ctx, { act, res, done }) {
       <button class="pill">다음 달로 ▶</button>
     </div>`;
   sparkles(root, 10);
-  run(root, act, res, done);
+  run(root, s, act, res, done);
 }
 
-async function run(root, act, res, done) {
+async function run(root, s, act, res, done) {
   const lbl = root.querySelector('.act-progress .lbl');
   const fill = root.querySelector('.act-progress i');
   for (let i = 0; i < WEEKS.length; i++) {
@@ -41,10 +41,13 @@ async function run(root, act, res, done) {
   const box = root.querySelector('.act-result');
   const rows = box.querySelector('.rows');
   const ch = res.changes;
+  const maxed = maxedGains(s, act);
   rows.innerHTML = Object.entries(ch).map(([k, v]) => `
     <div class="res-row ${(k === 'fat' ? v > 0 : v < 0) ? 'minus' : ''}">
-      <span>${k === 'gold' ? '🪙 돈' : STAT_NAMES[k]}</span><b>${v > 0 ? '+' : ''}${v}${k === 'gold' ? ' G' : ''}</b>
-    </div>`).join('') || '<div class="res-row"><span>변화 없음</span></div>';
+      <span>${k === 'gold' ? '🪙 돈' : STAT_NAMES[k]}</span><b>${v > 0 ? '+' : ''}${v}${k === 'gold' ? ' G' : ''}${maxed.includes(k) ? ' <span class="max">MAX ✨</span>' : ''}</b>
+    </div>`).join('')
+    + maxed.filter((k) => !(k in ch)).map((k) => `<div class="res-row"><span>${STAT_NAMES[k]}</span><b><span class="max">MAX ✨</span></b></div>`).join('')
+    || '<div class="res-row"><span>변화 없음</span></div>';
   const notes = [];
   if (res.tired) notes.push('😵 너무 피곤해서 집중을 잘 못 했어요… (효과 절반)');
   if (res.sick) notes.push('🤒 앗, 열이 나기 시작했어요! 다음 달은 쉬어야 해요.');

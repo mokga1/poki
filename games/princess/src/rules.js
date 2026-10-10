@@ -7,6 +7,7 @@ import { ENDINGS } from './data/endings.js';
 export const STATS = ['vit', 'str', 'int', 'mgc', 'cha', 'gra'];
 export const STAT_NAMES = { vit: '체력', str: '힘', int: '지능', mgc: '마력', cha: '매력', gra: '기품', fat: '피로' };
 export const MAX_MONTH = 36;
+export const STAT_MAX = 200; // 피로(fat)만 0~100
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 export function newGame(charId, name) {
@@ -64,7 +65,7 @@ export function addStats(s, delta) {
       continue;
     }
     const before = s.stats[k];
-    s.stats[k] = clamp(before + v, 0, 100);
+    s.stats[k] = clamp(before + v, 0, k === 'fat' ? 100 : STAT_MAX);
     if (s.stats[k] !== before) changed[k] = s.stats[k] - before;
   }
   return changed;
@@ -86,6 +87,9 @@ export function applyActivity(s, act) {
   if (sick) s.sick = true;
   return { changes, tired, sick };
 }
+
+// 이 활동이 올려주는 능력치 중 이미 최고(200)인 것
+export const maxedGains = (s, act) => Object.entries(act.gain).filter(([k, v]) => k !== 'fat' && v > 0 && s.stats[k] >= STAT_MAX).map(([k]) => k);
 
 export function recover(s) {
   s.sick = false;

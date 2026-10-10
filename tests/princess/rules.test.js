@@ -21,12 +21,25 @@ test('dateInfo: 1달째 = 1년차 3월 12살 봄, 12달째 = 2월 겨울', () =>
   assert.equal(R.dateInfo(8).season, 'autumn'); // 10월
 });
 
-test('addStats: 0~100 범위, 돈은 음수 불가', () => {
+test('addStats: 능력치 0~200 범위, 돈은 음수 불가', () => {
   const s = fresh();
-  s.stats.str = 98; s.gold = 10;
-  const ch = R.addStats(s, { str: 6, int: -50, gold: -30 });
-  assert.equal(s.stats.str, 100); assert.equal(s.stats.int, 0); assert.equal(s.gold, 0);
-  assert.deepEqual(ch, { str: 2, int: -15, gold: -10 });
+  s.stats.str = 198; s.stats.cha = 98; s.gold = 10;
+  const ch = R.addStats(s, { str: 6, cha: 6, int: -50, gold: -30 });
+  assert.equal(R.STAT_MAX, 200);
+  assert.equal(s.stats.str, 200); assert.equal(s.stats.cha, 104); assert.equal(s.stats.int, 0); assert.equal(s.gold, 0);
+  assert.deepEqual(ch, { str: 2, cha: 6, int: -15, gold: -10 });
+});
+
+test('addStats: 피로는 그대로 0~100', () => {
+  const s = fresh(); s.stats.fat = 95;
+  R.addStats(s, { fat: 20 });
+  assert.equal(s.stats.fat, 100);
+});
+
+test('maxedGains: 이미 최고인 능력치를 알려준다', () => {
+  const s = fresh(); s.stats.str = 200;
+  assert.deepEqual(R.maxedGains(s, ACTIVITIES.sword), ['str']);
+  assert.deepEqual(R.maxedGains(s, ACTIVITIES.magic), []);
 });
 
 test('applyActivity: 공부는 돈을 쓰고 능력치를 올린다', () => {

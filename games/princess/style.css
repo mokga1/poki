@@ -456,3 +456,10 @@ html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
   #rotate small { font-family: 'Gowun Dodum'; font-size: 18px; color: #9a5480; }
 }
 @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+
+/* ---------- MAX 표시 ---------- */
+.max { font-family: 'Jua'; font-size: 13px; color: #fff; background: linear-gradient(180deg, #ffd86b, #f2a20c); padding: 1px 7px; border-radius: 9px; white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(160,90,0,.4); box-shadow: 0 0 8px rgba(255,200,60,.7); animation: maxGlow 1.6s ease-in-out infinite; }
+@keyframes maxGlow { 50% { box-shadow: 0 0 14px rgba(255,200,60,1); } }
+.stat .num .max { font-size: 12px; }
+.pick .maxed { position: absolute; top: 8px; left: 8px; font-family: 'Jua'; font-size: 11px; color: #fff; background: #f2a20c; border-radius: 8px; padding: 1px 6px; }
