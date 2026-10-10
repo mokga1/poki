@@ -3,6 +3,7 @@ import { titleBg, CROWN_SVG } from '../art/scenes.js';
 import { avatar } from '../art/avatar.js';
 import { CHARACTERS } from '../data/characters.js';
 import { hasSave, load, clearSave } from '../state.js';
+import { MAX_MONTH } from '../rules.js';
 import { modal, sparkles } from '../ui.js';
 import { sfx, music } from '../sound.js';
 
@@ -29,7 +30,7 @@ export function render(root, ctx) {
     sfx('click');
     if (act === 'continue') {
       ctx.state = load();
-      ctx.go('home');
+      ctx.go(ctx.state.month > MAX_MONTH ? 'ending' : 'home');
     } else if (act === 'gallery') {
       ctx.go('gallery', { back: 'title' });
     } else if (act === 'new') {

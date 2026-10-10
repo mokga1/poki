@@ -13,7 +13,7 @@ function tower(x, y, w, h, roof) {
 }
 
 // 동화 속 성 (타이틀·캐릭터 고르기 공통)
-function castle(cx, base, s = 1) {
+export function castle(cx, base, s = 1) {
   return `<g transform="translate(${cx} ${base}) scale(${s}) translate(-300 -420)">
     ${tower(40, 140, 90, 280, '#a99bff')}${tower(470, 140, 90, 280, '#a99bff')}
     <rect x="110" y="230" width="380" height="190" fill="url(#cw)"/>
@@ -27,7 +27,7 @@ function castle(cx, base, s = 1) {
   </g>`;
 }
 
-const castleDefs = `<linearGradient id="cw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#ffe0ee"/></linearGradient>`;
+export const castleDefs = `<linearGradient id="cw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#ffe0ee"/></linearGradient>`;
 
 function flowers(list) {
   return list.map(([x, y, c, s = 1]) => `<g transform="translate(${x} ${y}) scale(${s})">${[0, 72, 144, 216, 288].map((d) =>

@@ -7,13 +7,15 @@ import * as shop from './screens/shop.js';
 import * as equipScreen from './screens/equip.js';
 import * as adventure from './screens/adventure.js';
 import * as battle from './screens/battle.js';
+import * as ending from './screens/ending.js';
+import * as gallery from './screens/gallery.js';
 import { save } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
 import { installStory } from './story.js';
 import { chooseActivity, chooseRegion, talkToLulu, runEvents } from './flow.js';
 
-const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle };
+const screens = { title, select, home, activity, shop, equip: equipScreen, adventure, battle, ending, gallery };
 
 const ctx = {
   state: null,
@@ -49,6 +51,7 @@ const actions = {
   adventure: () => chooseRegion(ctx),
   shop: () => ctx.go('shop'),
   equip: () => ctx.go('equip'),
+  gallery: () => ctx.go('gallery', { back: 'home' }),
   talk: () => talkToLulu(ctx, home.luluAdvice(ctx.state)),
 };
 

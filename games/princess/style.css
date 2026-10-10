@@ -381,3 +381,35 @@ button.chip { cursor: pointer; }
 .dlg-portrait.none { display: none; }
 .dlg-pic { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); font-size: 110px; filter: drop-shadow(0 8px 12px rgba(120,60,100,.25)); pointer-events: none; }
 .dlg-pic span { display: inline-block; }
+
+/* ---------- 엔딩 ---------- */
+.end-girl { position: absolute; left: 50%; bottom: 4%; height: 40%; aspect-ratio: 300/420; transform: translateX(-50%); }
+.end-girl svg, .end-girl2 svg, .end-friend svg { width: 100%; height: 100%; overflow: visible; }
+.end-stage { position: absolute; left: 4%; bottom: 4%; width: 40%; height: 78%; }
+.end-girl2 { position: absolute; left: 50%; bottom: 0; height: 92%; aspect-ratio: 300/420; transform: translateX(-50%); }
+.end-friend { position: absolute; left: 74%; bottom: -2%; height: 38%; aspect-ratio: 1; z-index: 2; }
+.end-banner { position: absolute; top: 5%; left: 0; right: 0; text-align: center; font-family: 'Jua'; font-size: clamp(36px, 6.5vh, 58px); color: #fff;
+  text-shadow: 0 0 14px #ff9ed1, 3px 3px 0 #c0367f, -2px -2px 0 #c0367f, 2px -2px 0 #c0367f, -2px 2px 0 #c0367f; z-index: 3; }
+.end-banner small { display: block; font-size: 20px; letter-spacing: 4px; opacity: .95; }
+.end-banner .new { display: inline-block; font-size: 18px; background: #ffd84d; color: #a0560b; text-shadow: none; padding: 2px 10px; border-radius: 10px; margin-left: 10px; vertical-align: middle; border: 3px solid #fff; }
+.end-text { position: absolute; right: 4%; top: 24%; width: min(560px, 50vw); padding: 26px 28px 20px; z-index: 3; }
+.end-text p { margin: 0 0 14px; font-size: 19px; line-height: 1.75; color: #6a3557; }
+.end-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: 'Jua'; font-size: 15px; color: #a35a85; background: #fff7fb; border-radius: 14px; padding: 8px 12px; }
+.end-stats b { font-weight: normal; color: #ee4f96; }
+.end-btns { display: flex; gap: 12px; justify-content: center; margin-top: 14px; }
+.petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+.petals i { position: absolute; top: -6%; font-style: normal; font-size: 22px; animation: drift linear infinite; }
+
+/* ---------- 엔딩 도감 ---------- */
+.gallery { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); width: min(1100px, 94vw); display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+.gcard { position: relative; height: min(31vh, 230px); border-radius: 20px; border: 4px solid #fff; cursor: default; padding: 8px 6px; display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(180deg, #fff, #f3e8ef); box-shadow: 0 0 0 3px #e9d4e0, 0 8px 18px rgba(150,70,120,.15); }
+.gcard.got { background: linear-gradient(180deg, #fff, var(--bgc)); box-shadow: 0 0 0 3px #ffc94d, 0 8px 18px rgba(150,70,120,.2); cursor: pointer; }
+.gcard.got:hover { transform: translateY(-4px); }
+.gcard .gno { position: absolute; top: 6px; left: 8px; font-family: 'Jua'; font-size: 13px; color: #c9a0b8; }
+.gcard .gpic { flex: 1; min-height: 0; width: 100%; display: grid; place-items: center; }
+.gcard .gpic svg { height: 100%; width: auto; overflow: visible; }
+.gcard .q { font-family: 'Jua'; font-size: 54px; color: #e3c6d6; }
+.gcard .gt { font-family: 'Jua'; font-size: 15px; color: #b04880; text-align: center; line-height: 1.2; }
+.gcard .gh { font-size: 11px; color: #a08898; text-align: center; line-height: 1.3; margin-top: 2px; }
+.gtext { font-size: 18px; line-height: 1.75; max-width: 520px; margin: 0; }
