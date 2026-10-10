@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>꼬마 공주 키우기 - 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { font-family: 'Gowun Dodum', 'Segoe UI', sans-serif; color: #7a3d63; background: #fde6f1; }
+  .jua { font-family: 'Jua', sans-serif; }
+
+  /* 시안 전환 탭 */
+  #mock-tabs { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; gap: 6px;
+    background: rgba(255,255,255,.85); padding: 6px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+  #mock-tabs button { font-family: 'Jua'; font-size: 15px; border: 0; padding: 6px 14px; border-radius: 14px; background: #fff0f7; color: #b04880; cursor: pointer; }
+  #mock-tabs button.on { background: #ee5a9b; color: #fff; }
+
+  .screen { position: absolute; inset: 0; display: none; }
+  .screen.on { display: block; }
+  .bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* ---------- 공통 꾸밈 ---------- */
+  .frame {
+    background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,246,251,.94));
+    border: 4px solid #f7bcd6; border-radius: 26px; position: relative;
+    box-shadow: 0 10px 30px rgba(214, 95, 150, .25), inset 0 0 0 3px #fff, inset 0 0 0 5px #fbd9e8;
+  }
+  .frame::before, .frame::after {
+    content: '✦'; position: absolute; color: #f4a3c6; font-size: 20px; top: 6px;
+  }
+  .frame::before { left: 12px; } .frame::after { right: 12px; }
+  .ribbon {
+    position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(180deg, #ff8fbf, #ec4f94); color: #fff; font-family: 'Jua'; font-size: 20px;
+    padding: 6px 30px; border-radius: 6px; white-space: nowrap; text-shadow: 0 2px 0 #c33a78;
+    box-shadow: 0 4px 0 #c33a78;
+  }
+  .ribbon::before, .ribbon::after {
+    content: ''; position: absolute; top: 8px; width: 18px; height: 100%; background: #d9417f; z-index: -1;
+  }
+  .ribbon::before { left: -12px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 50%); }
+  .ribbon::after { right: -12px; clip-path: polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%); }
+
+  .sparkle { position: absolute; color: #fff; pointer-events: none; text-shadow: 0 0 8px #ffd1ea, 0 0 2px #ff9fcf;
+    animation: twinkle 2.4s ease-in-out infinite; }
+  @keyframes twinkle { 0%,100% { opacity: .15; transform: scale(.6) rotate(0); } 50% { opacity: 1; transform: scale(1.15) rotate(30deg); } }
+
+  .float { animation: float 3.4s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .breathe { animation: breathe 3s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes breathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.012, .99); } }
+  .blink { animation: blink 4.5s infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+
+  /* ---------- 상단 바 ---------- */
+  .topbar { position: absolute; top: 0; left: 0; right: 0; height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 20px; z-index: 5;
+    background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55)); border-bottom: 3px solid #f9c5dc; }
+  .home { font-family: 'Jua'; color: #c0508c; text-decoration: none; font-size: 17px; background: #fff; padding: 6px 12px; border-radius: 14px; border: 2px solid #f7c3da; }
+  .logo { font-family: 'Jua'; font-size: 30px; color: #ee4f96; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 10px rgba(238,79,150,.35); }
+  .spacer { flex: 1; }
+  .chip { font-family: 'Jua'; font-size: 18px; background: #fff; border: 3px solid #f7c3da; border-radius: 20px; padding: 4px 14px; display: flex; align-items: center; gap: 6px; color: #b04880; }
+  .chip.gold { border-color: #f6d27a; color: #b07a10; background: linear-gradient(180deg,#fffbe9,#fff1c4); }
+  .chip.cal { background: linear-gradient(180deg,#fff,#ffeef6); }
+
+  /* ---------- 메인 화면 ---------- */
+  .stage { position: absolute; left: 0; top: 64px; bottom: 0; width: 56%; }
+  .stage .avatar-wrap { position: absolute; left: 50%; bottom: 7%; height: 74%; transform: translateX(-50%); aspect-ratio: 300/420; }
+  .stage .avatar-wrap svg { width: 100%; height: 100%; overflow: visible; }
+  .stage .glow { position: absolute; left: 50%; bottom: 4%; width: 46%; aspect-ratio: 3/1; transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(255,255,255,.9), rgba(255,220,238,.5) 45%, transparent 70%); }
+  .nameplate { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); font-family: 'Jua'; font-size: 22px; color: #fff;
+    background: linear-gradient(180deg,#ffa2c8,#ec5797); padding: 6px 26px; border-radius: 22px; border: 3px solid #fff;
+    box-shadow: 0 6px 14px rgba(236,87,151,.35); white-space: nowrap; }
+  .fairy { position: absolute; left: 4%; top: 6%; width: 120px; }
+  .bubble { position: absolute; left: calc(4% + 118px); top: 8%; max-width: 260px; background: #fff; border: 3px solid #f7c3da; border-radius: 22px;
+    padding: 12px 16px; font-size: 17px; line-height: 1.5; color: #8a4470; box-shadow: 0 6px 16px rgba(214,95,150,.18); }
+  .bubble::before { content: ''; position: absolute; left: -14px; top: 26px; border: 8px solid transparent; border-right: 12px solid #f7c3da; }
+  .bubble b { color: #ee4f96; }
+
+  .side { position: absolute; right: 2.5%; top: calc(64px + 4%); bottom: 4%; width: 41%; display: flex; flex-direction: column; gap: 28px; }
+  .stats { padding: 28px 22px 16px; }
+  .stat { display: grid; grid-template-columns: 34px 52px 1fr 38px; align-items: center; gap: 8px; margin: 7px 0; font-family: 'Jua'; font-size: 17px; }
+  .stat .ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; background: #fff; box-shadow: 0 2px 0 rgba(0,0,0,.08), inset 0 0 0 2px var(--c); }
+  .bar { height: 16px; border-radius: 10px; background: #f6e6ef; box-shadow: inset 0 2px 3px rgba(0,0,0,.08); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 10px; background: linear-gradient(180deg, var(--c2), var(--c)); position: relative; }
+  .bar > i::after { content: ''; position: absolute; left: 6px; right: 6px; top: 3px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.55); }
+  .stat .num { text-align: right; color: #a35a85; }
+
+  .menu { padding: 30px 18px 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .mbtn { aspect-ratio: 1; border-radius: 22px; border: 3px solid #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-family: 'Jua'; font-size: 16px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.18);
+    background: linear-gradient(180deg, var(--a), var(--b)); box-shadow: 0 5px 0 var(--s), 0 8px 16px rgba(0,0,0,.12); transition: transform .12s; }
+  .mbtn:hover { transform: translateY(-4px) scale(1.04); }
+  .mbtn .e { font-size: 34px; filter: drop-shadow(0 3px 2px rgba(0,0,0,.15)); }
+  .mbtn.hero { position: relative; }
+  .mbtn.hero::after { content: 'NEW'; position: absolute; top: -10px; right: -8px; font-size: 12px; background: #ffd84d; color: #a0560b; text-shadow: none; padding: 2px 6px; border-radius: 8px; border: 2px solid #fff; }
+
+  /* ---------- 캐릭터 고르기 ---------- */
+  .select-title { position: absolute; top: 9%; left: 0; right: 0; text-align: center; font-family: 'Jua'; font-size: 46px; color: #ee4f96;
+    text-shadow: 3px 3px 0 #fff, -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff, 0 6px 14px rgba(238,79,150,.35); }
+  .select-sub { position: absolute; top: calc(9% + 62px); left: 0; right: 0; text-align: center; font-size: 19px; color: #9a5480; }
+  .cards { position: absolute; left: 50%; top: 27%; transform: translateX(-50%); display: flex; gap: 22px; }
+  .card { width: 220px; height: 400px; border-radius: 28px; padding: 14px; position: relative; cursor: pointer; transition: transform .15s;
+    background: linear-gradient(180deg, #fff 0%, var(--t) 100%); border: 4px solid #fff; box-shadow: 0 0 0 3px var(--k), 0 14px 30px rgba(150,70,120,.25); }
+  .card:hover { transform: translateY(-10px) rotate(-1deg); }
+  .card.picked { box-shadow: 0 0 0 5px #ffd84d, 0 0 30px 6px rgba(255,216,77,.7), 0 14px 30px rgba(150,70,120,.25); transform: translateY(-14px) scale(1.04); }
+  .card svg { width: 100%; height: 250px; overflow: visible; }
+  .card .nm { text-align: center; font-family: 'Jua'; font-size: 26px; color: var(--k2); margin-top: 2px; }
+  .card .tr { text-align: center; font-size: 15px; color: #8a5a78; margin-top: 2px; }
+  .card .tag { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+  .card .tag span { font-family: 'Jua'; font-size: 14px; padding: 3px 10px; border-radius: 12px; background: #fff; color: var(--k2); border: 2px solid var(--k); }
+  .card .gem { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--k) 45%, var(--k2)); border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.2); }
+  .startbtn { position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); font-family: 'Jua'; font-size: 26px; color: #fff; border: 4px solid #fff; border-radius: 34px; padding: 12px 46px;
+    background: linear-gradient(180deg,#ff9cc7,#ec4f94); box-shadow: 0 6px 0 #c33a78, 0 12px 24px rgba(236,79,148,.4); cursor: pointer; text-shadow: 0 2px 0 #c33a78; }
+
+  /* ---------- 전투 ---------- */
+  .bt-hp { position: absolute; top: calc(64px + 4%); width: 300px; padding: 14px 18px; }
+  .bt-hp.me { left: 4%; } .bt-hp.en { right: 4%; }
+  .bt-hp .nm { font-family: 'Jua'; font-size: 22px; display: flex; justify-content: space-between; }
+  .bt-hp .lv { font-size: 15px; color: #b77; }
+  .hpbar { height: 18px; border-radius: 10px; background: #f3e0e8; margin-top: 8px; overflow: hidden; box-shadow: inset 0 2px 3px rgba(0,0,0,.1); }
+  .hpbar i { display: block; height: 100%; background: linear-gradient(180deg,#8ff0a8,#35c46a); position: relative; border-radius: 10px; }
+  .hpbar.mp i { background: linear-gradient(180deg,#b9b3ff,#7a6cf0); }
+  .hpbar i::after { content: ''; position: absolute; left: 6px; right: 6px; top: 3px; height: 4px; background: rgba(255,255,255,.55); border-radius: 4px; }
+  .bt-hp .sm { font-size: 14px; text-align: right; color: #8a6a7a; margin-top: 2px; }
+  .hero-b { position: absolute; left: 14%; bottom: 25%; height: 46%; aspect-ratio: 300/420; }
+  .hero-b svg, .enemy svg { width: 100%; height: 100%; overflow: visible; }
+  .enemy { position: absolute; right: 16%; bottom: 29%; height: 30%; aspect-ratio: 1; }
+  .squish { animation: squish 1.1s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes squish { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.08,.9); } }
+  .dmg { position: absolute; right: 22%; bottom: 58%; font-family: 'Jua'; font-size: 44px; color: #fff; text-shadow: 0 0 0 #000, 3px 3px 0 #ff5a8a, -2px -2px 0 #ff5a8a, 2px -2px 0 #ff5a8a, -2px 2px 0 #ff5a8a;
+    animation: pop 1.6s ease-out infinite; }
+  @keyframes pop { 0% { transform: translateY(10px) scale(.5); opacity: 0; } 20% { transform: translateY(-10px) scale(1.2); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+  .bt-bottom { position: absolute; left: 4%; right: 4%; bottom: 3%; display: grid; grid-template-columns: 1fr 460px; gap: 18px; height: 19%; }
+  .msg { padding: 18px 26px; font-size: 21px; line-height: 1.6; display: flex; align-items: center; }
+  .msg b { color: #ee4f96; font-family: 'Jua'; font-weight: normal; }
+  .cmds { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .cmds .mbtn { aspect-ratio: auto; font-size: 19px; }
+</style>
+</head>
+<body>
+
+<div id="mock-tabs">
+  <button data-s="select">① 캐릭터 고르기</button>
+  <button data-s="main" class="on">② 메인 화면</button>
+  <button data-s="battle">③ 전투</button>
+</div>
+
+<!-- ================= 캐릭터 고르기 ================= -->
+<section class="screen" id="select">
+  <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd6ea"/><stop offset=".55" stop-color="#ffeef6"/><stop offset="1" stop-color="#fff7e6"/></linearGradient>
+      <radialGradient id="sun1" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#sky1)"/>
+    <circle cx="800" cy="420" r="520" fill="url(#sun1)"/>
+    <g fill="#fff" opacity=".9">
+      <ellipse cx="200" cy="170" rx="110" ry="38"/><ellipse cx="270" cy="150" rx="70" ry="44"/><ellipse cx="150" cy="150" rx="50" ry="34"/>
+      <ellipse cx="1380" cy="210" rx="120" ry="40"/><ellipse cx="1450" cy="185" rx="70" ry="44"/><ellipse cx="1320" cy="190" rx="54" ry="34"/>
+    </g>
+    <!-- 성 실루엣 -->
+    <g fill="#f8c8de" opacity=".75">
+      <rect x="640" y="520" width="320" height="240"/><rect x="600" y="440" width="70" height="320"/><rect x="930" y="440" width="70" height="320"/>
+      <polygon points="600,440 635,360 670,440"/><polygon points="930,440 965,360 1000,440"/>
+      <rect x="760" y="420" width="80" height="120"/><polygon points="750,420 800,320 850,420"/>
+    </g>
+    <path d="M0 760 Q 400 690 800 740 T 1600 720 L1600 900 L0 900 Z" fill="#ffd2e6"/>
+    <path d="M0 810 Q 400 760 800 800 T 1600 790 L1600 900 L0 900 Z" fill="#ffc0dc"/>
+  </svg>
+  <div class="select-title">누구를 키워볼까요?</div>
+  <div class="select-sub">공주님을 한 명 골라 이름을 지어주세요 ♡</div>
+  <div class="cards" id="cards"></div>
+  <button class="startbtn">이 공주님으로 시작! ✨</button>
+</section>
+
+<!-- ================= 메인 화면 ================= -->
+<section class="screen on" id="main">
+  <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe4f0"/><stop offset="1" stop-color="#ffd3e6"/></linearGradient>
+      <pattern id="stripe" width="64" height="64" patternUnits="userSpaceOnUse">
+        <rect width="32" height="64" fill="#fff" opacity=".35"/>
+        <path d="M48 26 c-3 -5 -10 -3 -8 3 c1 3 8 8 8 8 s7 -5 8 -8 c2 -6 -5 -8 -8 -3z" fill="#ffb6d3" opacity=".55"/>
+      </pattern>
+      <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c1d8"/><stop offset="1" stop-color="#e79fc1"/></linearGradient>
+      <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8f8ee8"/><stop offset="1" stop-color="#f3b7da"/></linearGradient>
+      <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff9cc4"/><stop offset=".5" stop-color="#ffc2dc"/><stop offset="1" stop-color="#f77fb2"/></linearGradient>
+      <radialGradient id="rug" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6fb"/><stop offset=".75" stop-color="#ffd9ea"/><stop offset="1" stop-color="#f7b2d0"/></radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#wall)"/>
+    <rect width="1600" height="640" fill="url(#stripe)"/>
+    <!-- 깃발 가랜드 -->
+    <path d="M0 110 Q 400 190 800 120 T 1600 120" stroke="#e27aa9" stroke-width="3" fill="none"/>
+    <g>
+      <polygon points="60,128 100,136 76,182" fill="#ffd36e"/><polygon points="160,146 200,152 176,198" fill="#9fdcff"/>
+      <polygon points="260,158 300,160 278,206" fill="#ffa7c9"/><polygon points="360,162 400,160 378,208" fill="#b8f0c2"/>
+      <polygon points="460,158 500,154 478,202" fill="#d8b8ff"/><polygon points="560,148 600,142 578,190" fill="#ffd36e"/>
+      <polygon points="660,134 700,128 678,176" fill="#9fdcff"/>
+    </g>
+    <!-- 창문 -->
+    <g transform="translate(420 170)">
+      <path d="M0 340 L0 130 A 130 130 0 0 1 260 130 L260 340 Z" fill="url(#night)"/>
+      <circle cx="190" cy="90" r="30" fill="#fff6c8"/><circle cx="204" cy="80" r="28" fill="url(#night)"/>
+      <g fill="#fff"><circle cx="60" cy="120" r="3"/><circle cx="120" cy="70" r="2.5"/><circle cx="90" cy="200" r="2"/><circle cx="210" cy="190" r="3"/><circle cx="160" cy="250" r="2"/><circle cx="40" cy="260" r="2.5"/></g>
+      <path d="M0 340 L0 130 A 130 130 0 0 1 260 130 L260 340 Z" fill="none" stroke="#fff" stroke-width="16"/>
+      <path d="M130 0 L130 340 M0 200 L260 200" stroke="#fff" stroke-width="9"/>
+      <rect x="-24" y="336" width="308" height="22" rx="8" fill="#fff"/>
+      <!-- 화분 -->
+      <path d="M40 336 L48 300 L92 300 L100 336 Z" fill="#f59ac0"/><circle cx="60" cy="286" r="16" fill="#ff7fa8"/><circle cx="82" cy="282" r="14" fill="#ffd36e"/><circle cx="70" cy="270" r="13" fill="#ffa7c9"/>
+    </g>
+    <!-- 커튼 -->
+    <path d="M360 140 Q 380 330 340 560 L430 560 Q 400 380 440 210 Q 420 160 440 140 Z" fill="url(#curtain)"/>
+    <path d="M740 140 Q 720 330 760 560 L670 560 Q 700 380 660 210 Q 680 160 660 140 Z" fill="url(#curtain)"/>
+    <rect x="330" y="128" width="440" height="18" rx="9" fill="#e9a943"/>
+    <circle cx="330" cy="137" r="14" fill="#ffd36e"/><circle cx="770" cy="137" r="14" fill="#ffd36e"/>
+    <circle cx="392" cy="390" r="12" fill="#ffd36e"/><circle cx="708" cy="390" r="12" fill="#ffd36e"/>
+    <!-- 벽 하단 판넬 -->
+    <rect y="600" width="1600" height="60" fill="#fff" opacity=".7"/>
+    <rect y="596" width="1600" height="8" fill="#f3a9c9"/>
+    <!-- 바닥 -->
+    <rect y="660" width="1600" height="240" fill="url(#floor)"/>
+    <g stroke="#e090b6" stroke-width="2" opacity=".6"><path d="M0 720 H1600 M0 790 H1600 M0 860 H1600"/></g>
+    <ellipse cx="450" cy="790" rx="420" ry="80" fill="url(#rug)"/>
+    <ellipse cx="450" cy="790" rx="380" ry="64" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"/>
+    <!-- 샹들리에 -->
+    <g transform="translate(160 0)">
+      <path d="M0 0 V70" stroke="#e9a943" stroke-width="4"/>
+      <path d="M-70 80 Q 0 130 70 80" stroke="#e9a943" stroke-width="6" fill="none"/>
+      <g fill="#fff6c8"><ellipse cx="-70" cy="70" rx="8" ry="14"/><ellipse cx="0" cy="98" rx="8" ry="14"/><ellipse cx="70" cy="70" rx="8" ry="14"/></g>
+      <g fill="#ffd1ea"><circle cx="-40" cy="112" r="6"/><circle cx="0" cy="124" r="7"/><circle cx="40" cy="112" r="6"/></g>
+    </g>
+  </svg>
+
+  <div class="topbar">
+    <a class="home" href="#">← 메뉴</a>
+    <span class="logo">👑 꼬마 공주 키우기</span>
+    <span class="spacer"></span>
+    <span class="chip cal">🌸 1년차 4월 · 12살</span>
+    <span class="chip gold">🪙 320 G</span>
+    <span class="chip">🔊</span>
+  </div>
+
+  <div class="stage">
+    <div class="glow"></div>
+    <div class="avatar-wrap breathe" id="main-avatar"></div>
+    <div class="nameplate">✦ 루비 공주 ✦</div>
+    <div class="fairy float" id="fairy"></div>
+    <div class="bubble">봄이 왔어요! 🌷<br>이번 달에는 <b>무엇을</b> 할까요?</div>
+  </div>
+
+  <div class="side">
+    <div class="frame stats">
+      <div class="ribbon">공주의 능력치</div>
+      <div class="stat" style="--c:#ff7f9e;--c2:#ffb8c9"><span class="ic">❤️</span>체력<div class="bar"><i style="width:72%"></i></div><span class="num">72</span></div>
+      <div class="stat" style="--c:#ff8a4c;--c2:#ffc39b"><span class="ic">💪</span>힘<div class="bar"><i style="width:58%"></i></div><span class="num">58</span></div>
+      <div class="stat" style="--c:#4c9dff;--c2:#a8d1ff"><span class="ic">📖</span>지능<div class="bar"><i style="width:34%"></i></div><span class="num">34</span></div>
+      <div class="stat" style="--c:#9b6cff;--c2:#cfbaff"><span class="ic">🔮</span>마력<div class="bar"><i style="width:26%"></i></div><span class="num">26</span></div>
+      <div class="stat" style="--c:#f05ba7;--c2:#ffb3d8"><span class="ic">🌸</span>매력<div class="bar"><i style="width:45%"></i></div><span class="num">45</span></div>
+      <div class="stat" style="--c:#e3a51a;--c2:#ffe08a"><span class="ic">👑</span>기품<div class="bar"><i style="width:38%"></i></div><span class="num">38</span></div>
+      <div class="stat" style="--c:#9aa3b5;--c2:#d6dbe6"><span class="ic">💤</span>피로<div class="bar"><i style="width:18%"></i></div><span class="num">18</span></div>
+    </div>
+    <div class="frame menu">
+      <div class="ribbon">이번 달 할 일</div>
+      <button class="mbtn" style="--a:#8fc8ff;--b:#5b9cf0;--s:#3f78c8"><span class="e">📚</span>공부</button>
+      <button class="mbtn" style="--a:#ffcf7a;--b:#f5a63b;--s:#c97f1c"><span class="e">🧁</span>아르바이트</button>
+      <button class="mbtn" style="--a:#b6ecc2;--b:#6fcf8a;--s:#3fa45f"><span class="e">🛏️</span>휴식</button>
+      <button class="mbtn hero" style="--a:#ff9cc7;--b:#ec4f94;--s:#c33a78"><span class="e">⚔️</span>무사수행</button>
+      <button class="mbtn" style="--a:#d7c1ff;--b:#a483f5;--s:#7a5ad0"><span class="e">🛍️</span>상점</button>
+      <button class="mbtn" style="--a:#ffb6a8;--b:#f57f6c;--s:#c95a49"><span class="e">🎀</span>장비</button>
+      <button class="mbtn" style="--a:#a8eef0;--b:#4fc8d0;--s:#2f9ea6"><span class="e">🧚</span>대화</button>
+      <button class="mbtn" style="--a:#ffe28a;--b:#f2c230;--s:#c49512"><span class="e">📜</span>엔딩 도감</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 전투 ================= -->
+<section class="screen" id="battle">
+  <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="fsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/><stop offset=".6" stop-color="#e9f7ff"/><stop offset="1" stop-color="#fff2f8"/></linearGradient>
+      <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6ebb4"/><stop offset="1" stop-color="#8fd59a"/></linearGradient>
+      <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fe0a0"/><stop offset="1" stop-color="#6cc485"/></linearGradient>
+      <radialGradient id="plat" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#c9f2c0"/><stop offset="1" stop-color="#7fcf8a"/></radialGradient>
+      <g id="tree"><rect x="-10" y="-20" width="20" height="90" rx="6" fill="#c08a64"/><circle cx="0" cy="-60" r="62" fill="#7fd08e"/><circle cx="-38" cy="-30" r="44" fill="#6cc485"/><circle cx="40" cy="-34" r="46" fill="#8ad99a"/><circle cx="-20" cy="-86" r="10" fill="#ffb3cf"/><circle cx="24" cy="-48" r="9" fill="#fff"/><circle cx="-40" cy="-40" r="8" fill="#ffd36e"/></g>
+      <g id="flower"><circle r="7" cx="0" cy="-8" fill="#fff"/><circle r="7" cx="8" cy="0" fill="#fff"/><circle r="7" cx="0" cy="8" fill="#fff"/><circle r="7" cx="-8" cy="0" fill="#fff"/><circle r="5" fill="#ffd36e"/></g>
+    </defs>
+    <rect width="1600" height="900" fill="url(#fsky)"/>
+    <g fill="#fff"><ellipse cx="300" cy="140" rx="120" ry="40"/><ellipse cx="380" cy="118" rx="70" ry="46"/><ellipse cx="1240" cy="180" rx="110" ry="36"/><ellipse cx="1300" cy="160" rx="60" ry="40"/></g>
+    <path d="M0 520 Q 300 420 600 500 T 1200 470 T 1600 500 L1600 900 L0 900 Z" fill="url(#hill1)"/>
+    <use href="#tree" transform="translate(120 520) scale(1.1)"/><use href="#tree" transform="translate(1480 500) scale(1.2)"/>
+    <use href="#tree" transform="translate(1290 520) scale(.8)"/><use href="#tree" transform="translate(330 500) scale(.75)"/>
+    <path d="M0 620 Q 400 560 800 610 T 1600 600 L1600 900 L0 900 Z" fill="url(#hill2)"/>
+    <ellipse cx="420" cy="720" rx="230" ry="46" fill="url(#plat)"/>
+    <ellipse cx="1170" cy="660" rx="200" ry="40" fill="url(#plat)"/>
+    <g><use href="#flower" x="80" y="700"/><use href="#flower" x="700" y="760"/><use href="#flower" x="900" y="690"/><use href="#flower" x="1500" y="740"/><use href="#flower" x="1000" y="800"/><use href="#flower" x="250" y="820"/></g>
+  </svg>
+
+  <div class="topbar">
+    <a class="home" href="#">← 마을로</a>
+    <span class="logo">🌳 반짝반짝 숲 · 3번째 칸</span>
+    <span class="spacer"></span>
+    <span class="chip">🧪 물약 ×3</span>
+  </div>
+
+  <div class="frame bt-hp me"><div class="nm jua"><span>루비</span><span class="lv">Lv.5</span></div>
+    <div class="hpbar"><i style="width:84%"></i></div><div class="sm">HP 42 / 50</div>
+    <div class="hpbar mp"><i style="width:60%"></i></div><div class="sm">MP 12 / 20</div></div>
+  <div class="frame bt-hp en"><div class="nm jua"><span>말랑 슬라임</span><span class="lv">Lv.3</span></div>
+    <div class="hpbar"><i style="width:40%;background:linear-gradient(180deg,#ffb0b0,#ff6a7a)"></i></div><div class="sm">HP 8 / 20</div></div>
+
+  <div class="hero-b float" id="battle-avatar"></div>
+  <div class="enemy squish" id="slime"></div>
+  <div class="dmg">12!</div>
+
+  <div class="bt-bottom">
+    <div class="frame msg"><span><b>루비</b>의 용감한 공격! 말랑 슬라임에게 <b>12</b> 데미지! ✨</span></div>
+    <div class="cmds">
+      <button class="mbtn" style="--a:#ffa6a6;--b:#f0606e;--s:#c2414f"><span class="e">⚔️</span>공격</button>
+      <button class="mbtn" style="--a:#d7c1ff;--b:#9b6cff;--s:#7450d6"><span class="e">✨</span>마법</button>
+      <button class="mbtn" style="--a:#b6ecc2;--b:#55c47a;--s:#3a9c58"><span class="e">🧪</span>물약</button>
+      <button class="mbtn" style="--a:#e2e6ee;--b:#aab3c4;--s:#7f889a"><span class="e">💨</span>도망</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ========== SD 캐릭터 SVG ========== */
+const CHARS = {
+  ruby:     { name:'루비',     trait:'용감하고 씩씩해요', tags:['힘 ↑','체력 ↑'], hair:['#ffa58a','#e0475a'], hairHi:'#ffd2c4', eye:['#9c1f35','#ff7a6b'], dress:['#ffb3c4','#f0648f'], style:'pony',  k:'#ff9aae', k2:'#d9435f', t:'#ffe1e8' },
+  sapphire: { name:'사파이어', trait:'책을 좋아하는 똑똑이', tags:['지능 ↑','마력 ↑'], hair:['#9ccaff','#4a6fd6'], hairHi:'#dceaff', eye:['#1d3a8a','#5aa8ff'], dress:['#c9d4ff','#7d8ff0'], style:'long',  k:'#9bb6ff', k2:'#4a62c8', t:'#e3ebff' },
+  rose:     { name:'로즈',     trait:'상냥하고 다정해요', tags:['매력 ↑','기품 ↑'], hair:['#ffc6e0','#f0629f'], hairHi:'#fff0f7', eye:['#a01d63','#ff7fbf'], dress:['#ffd1e6','#f78ab8'], style:'twin',  k:'#ffa9cf', k2:'#d8478f', t:'#ffe6f2' },
+  emerald:  { name:'에메랄드', trait:'뛰어놀기 대장 활발이', tags:['체력 ↑','매력 ↑'], hair:['#b4ecb0','#3faa72'], hairHi:'#eaffe6', eye:['#17603c','#5fd492'], dress:['#fff1a8','#f5c84a'], style:'bob',   k:'#9fe0b4', k2:'#2f9a62', t:'#e6fbea' },
+};
+
+function avatar(p, id, gear = {}) {
+  const [h1, h2] = p.hair, [e1, e2] = p.eye, [d1, d2] = p.dress;
+  const back = {
+    long: `<path d="M68 150 C56 54 244 54 232 150 C246 220 252 290 240 336 Q226 320 214 340 Q200 322 186 338 L114 338 Q100 322 86 340 Q74 320 60 336 C48 290 54 220 68 150Z" fill="url(#${id}h)"/>`,
+    bob:  `<path d="M68 150 C58 60 242 60 232 150 C238 186 236 208 224 220 Q206 208 194 222 L106 222 Q94 208 76 220 C64 208 62 186 68 150Z" fill="url(#${id}h)"/>`,
+    pony: `<path d="M68 150 C58 60 242 60 232 150 C236 186 232 204 222 214 L78 214 C68 204 64 186 68 150Z" fill="url(#${id}h)"/>
+           <path d="M196 74 C290 60 296 196 254 290 Q250 262 236 268 C262 200 250 120 200 104Z" fill="url(#${id}h)"/>`,
+    twin: `<path d="M68 150 C58 60 242 60 232 150 C236 186 232 204 222 214 L78 214 C68 204 64 186 68 150Z" fill="url(#${id}h)"/>
+           <g id="${id}tail"><path d="M80 104 C14 132 10 262 46 330 Q54 300 68 310 C46 246 58 176 96 132Z" fill="url(#${id}h)"/></g>
+           <use href="#${id}tail" transform="translate(300 0) scale(-1 1)"/>`,
+  }[p.style];
+  const ribbon = (x, y, c = d2) => `<g transform="translate(${x} ${y})"><path d="M0 0 L-20 -12 L-22 12Z M0 0 L20 -12 L22 12Z" fill="${c}"/><circle r="6" fill="${c}"/><circle r="3" cx="-1" cy="-1" fill="#fff" opacity=".6"/></g>`;
+  const extra = { pony: ribbon(206, 80), twin: ribbon(84, 108) + ribbon(216, 108), long: ribbon(92, 98, '#fff'), bob: `<g transform="translate(210 86)">${['#ff9fc4','#fff','#ffd36e'].map((c,i)=>`<circle cx="${i*9-9}" cy="${i%2?-6:0}" r="7" fill="${c}"/>`).join('')}</g>` }[p.style];
+
+  const eye = (cx, flip) => `
+    <g class="blink">
+      <ellipse cx="${cx}" cy="152" rx="17" ry="21" fill="#fff"/>
+      <ellipse cx="${cx}" cy="155" rx="14.5" ry="18.5" fill="url(#${id}i)"/>
+      <ellipse cx="${cx}" cy="157" rx="7" ry="9" fill="${e1}" opacity=".85"/>
+      <ellipse cx="${cx - 5}" cy="146" rx="5.5" ry="6.5" fill="#fff"/>
+      <circle cx="${cx + 6}" cy="164" r="2.6" fill="#fff"/>
+      <path d="M${cx - 15} 168 Q${cx} 175 ${cx + 15} 168" stroke="#fff" stroke-width="2" fill="none" opacity=".6"/>
+    </g>
+    <path d="M${cx - 19} 146 Q${cx} 126 ${cx + 19} 146" stroke="#4a2236" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M${flip ? cx + 18 : cx - 18} 145 l${flip ? 6 : -6} 2" stroke="#4a2236" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M${cx - 10} 116 Q${cx} 111 ${cx + 10} 116" stroke="${h2}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>`;
+
+  // 장비 ----------
+  const weapon = {
+    wood: `<g transform="translate(206 292) rotate(28)"><path d="M-6 -10 L-6 -84 L0 -96 L6 -84 L6 -10Z" fill="#e9c08f" stroke="#b9875a" stroke-width="2"/><rect x="-16" y="-12" width="32" height="7" rx="3.5" fill="#ff8fb5"/><rect x="-4" y="-6" width="8" height="24" rx="3" fill="#a8704b"/><circle cy="20" r="5" fill="#ff8fb5"/></g>`,
+    wand: `<g transform="translate(206 292) rotate(22)"><rect x="-3" y="-80" width="6" height="96" rx="3" fill="#fff" stroke="#e7b8d2" stroke-width="2"/><path d="M0 -112 L8 -94 L28 -92 L13 -79 L18 -59 L0 -70 L-18 -59 L-13 -79 L-28 -92 L-8 -94Z" fill="#ffe27a" stroke="#f2b632" stroke-width="2"/><circle cx="-4" cy="-90" r="3" fill="#fff"/></g>`,
+  }[gear.weapon] || '';
+  const hat = {
+    tiara: `<g transform="translate(150 66)"><path d="M-46 8 L-36 -18 L-20 2 L0 -30 L20 2 L36 -18 L46 8 Q0 18 -46 8Z" fill="#ffd864" stroke="#e6a92a" stroke-width="2.5"/><circle cy="-30" r="6" fill="#ff6fa5"/><circle cx="-36" cy="-18" r="4.5" fill="#7fd0ff"/><circle cx="36" cy="-18" r="4.5" fill="#7fd0ff"/><ellipse cy="2" rx="7" ry="8" fill="#ff6fa5" stroke="#fff" stroke-width="2"/></g>`,
+  }[gear.hat] || '';
+
+  return `<svg viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${h1}"/><stop offset="1" stop-color="${h2}"/></linearGradient>
+    <linearGradient id="${id}i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${e1}"/><stop offset="1" stop-color="${e2}"/></linearGradient>
+    <linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${d1}"/><stop offset="1" stop-color="${d2}"/></linearGradient>
+    <radialGradient id="${id}s" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fff3ec"/><stop offset="1" stop-color="#ffd8c6"/></radialGradient>
+  </defs>
+  <ellipse cx="150" cy="398" rx="70" ry="12" fill="#c2577f" opacity=".18"/>
+  ${back}
+  <!-- 다리 -->
+  <rect x="129" y="340" width="15" height="48" rx="7" fill="#ffe1d2"/><rect x="156" y="340" width="15" height="48" rx="7" fill="#ffe1d2"/>
+  <rect x="128" y="362" width="17" height="24" rx="5" fill="#fff"/><rect x="155" y="362" width="17" height="24" rx="5" fill="#fff"/>
+  <path d="M122 392 Q122 380 137 380 Q150 380 148 394 Z" fill="${d2}"/><path d="M178 392 Q178 380 163 380 Q150 380 152 394 Z" fill="${d2}"/>
+  <!-- 치마 -->
+  <path d="M84 346 Q150 386 216 346 L222 360 Q150 400 78 360Z" fill="#fff"/>
+  <g fill="#fff">${Array.from({length:9},(_,i)=>`<circle cx="${84+i*16.5}" cy="${362+Math.sin(i/8*Math.PI)*18}" r="7"/>`).join('')}</g>
+  <path d="M122 248 Q150 242 178 248 L220 350 Q150 384 80 350Z" fill="url(#${id}d)"/>
+  <path d="M100 330 Q150 356 200 330" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-dasharray="1 9" stroke-linecap="round"/>
+  <path d="M132 262 L168 262 L182 336 Q150 350 118 336Z" fill="#fff" opacity=".92"/>
+  <path d="M150 304 c-4 -7 -14 -4 -11 4 c2 5 11 11 11 11 s9 -6 11 -11 c3 -8 -7 -11 -11 -4z" fill="${d2}" opacity=".8"/>
+  <!-- 몸통 -->
+  <rect x="142" y="196" width="16" height="22" fill="#ffe1d2"/>
+  <path d="M120 216 Q150 206 180 216 L184 256 Q150 266 116 256Z" fill="url(#${id}d)"/>
+  <path d="M132 214 L150 232 L168 214" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="116" y="250" width="68" height="10" rx="5" fill="${d2}"/>
+  <path d="M150 255 L132 244 L130 266Z M150 255 L168 244 L170 266Z" fill="#fff"/><circle cx="150" cy="255" r="5" fill="#fff"/>
+  ${weapon}
+  <!-- 팔 -->
+  <path d="M114 230 Q102 258 106 286" stroke="#ffe1d2" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M186 230 Q198 258 204 286" stroke="#ffe1d2" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <circle cx="106" cy="290" r="8.5" fill="#ffe1d2"/><circle cx="205" cy="290" r="8.5" fill="#ffe1d2"/>
+  <circle cx="114" cy="226" r="17" fill="url(#${id}d)"/><circle cx="186" cy="226" r="17" fill="url(#${id}d)"/>
+  <path d="M104 220 q8 -8 16 -4" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/><path d="M180 216 q8 -4 16 4" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/>
+  <!-- 얼굴 -->
+  <ellipse cx="150" cy="142" rx="77" ry="71" fill="url(#${id}s)"/>
+  ${eye(121, false)}${eye(179, true)}
+  <ellipse cx="104" cy="180" rx="14" ry="7.5" fill="#ff8fab" opacity=".45"/><ellipse cx="196" cy="180" rx="14" ry="7.5" fill="#ff8fab" opacity=".45"/>
+  <path d="M143 182 Q150 192 157 182Z" fill="#ec6a80" stroke="#c94a63" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- 앞머리 -->
+  <path d="M70 152 C62 76 116 56 150 58 C184 56 238 76 230 152 L222 150 Q216 116 198 102 Q194 128 176 136 Q180 110 166 98 Q156 124 134 130 Q142 108 132 96 Q116 122 96 132 Q98 114 106 100 Q86 116 80 152Z" fill="url(#${id}h)"/>
+  <path d="M72 140 Q60 190 80 222 Q86 190 90 156Z" fill="url(#${id}h)"/><path d="M228 140 Q240 190 220 222 Q214 190 210 156Z" fill="url(#${id}h)"/>
+  <path d="M98 86 Q150 62 204 86" stroke="${p.hairHi}" stroke-width="7" fill="none" stroke-linecap="round" opacity=".75"/>
+  <path d="M116 84 l4 -10 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4Z" fill="#fff" opacity=".9"/>
+  ${extra}
+  ${hat}
+</svg>`;
+}
+
+const FAIRY = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <g opacity=".85"><ellipse cx="38" cy="50" rx="30" ry="20" fill="#c9f1ff" transform="rotate(-25 38 50)"/><ellipse cx="82" cy="50" rx="30" ry="20" fill="#c9f1ff" transform="rotate(25 82 50)"/>
+  <ellipse cx="42" cy="78" rx="18" ry="12" fill="#e6d4ff" transform="rotate(20 42 78)"/><ellipse cx="78" cy="78" rx="18" ry="12" fill="#e6d4ff" transform="rotate(-20 78 78)"/></g>
+  <path d="M50 74 L70 74 L78 104 L42 104Z" fill="#9fe3c8"/>
+  <circle cx="60" cy="58" r="20" fill="#fff0e8"/>
+  <path d="M40 58 C36 30 84 30 80 58 Q76 44 66 42 Q60 52 50 46 Q44 48 40 58Z" fill="#ffd36e"/>
+  <ellipse cx="53" cy="61" rx="3" ry="4" fill="#4a2236"/><ellipse cx="67" cy="61" rx="3" ry="4" fill="#4a2236"/>
+  <circle cx="52" cy="59.5" r="1.2" fill="#fff"/><circle cx="66" cy="59.5" r="1.2" fill="#fff"/>
+  <ellipse cx="47" cy="67" rx="4" ry="2.4" fill="#ff9fb3" opacity=".6"/><ellipse cx="73" cy="67" rx="4" ry="2.4" fill="#ff9fb3" opacity=".6"/>
+  <path d="M56 68 Q60 72 64 68" stroke="#c94a63" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M60 30 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3Z" fill="#fff6a8"/>
+</svg>`;
+
+const SLIME = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="sl" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d8ffd8"/><stop offset=".6" stop-color="#7fe0a0"/><stop offset="1" stop-color="#3fb873"/></radialGradient></defs>
+  <ellipse cx="100" cy="188" rx="80" ry="10" fill="#2f7a4a" opacity=".2"/>
+  <path d="M20 180 C10 120 50 40 100 38 C150 40 190 120 180 180 Q100 196 20 180Z" fill="url(#sl)"/>
+  <ellipse cx="70" cy="78" rx="18" ry="10" fill="#fff" opacity=".7" transform="rotate(-30 70 78)"/>
+  <path d="M100 40 Q96 18 112 10 Q114 28 100 40Z" fill="#7fd08e"/><path d="M100 40 Q110 22 128 24 Q120 40 100 40Z" fill="#9fe0a0"/>
+  <ellipse cx="78" cy="122" rx="9" ry="12" fill="#1f4a32"/><ellipse cx="122" cy="122" rx="9" ry="12" fill="#1f4a32"/>
+  <circle cx="75" cy="117" r="3.5" fill="#fff"/><circle cx="119" cy="117" r="3.5" fill="#fff"/>
+  <ellipse cx="62" cy="142" rx="10" ry="5" fill="#ff8fab" opacity=".5"/><ellipse cx="138" cy="142" rx="10" ry="5" fill="#ff8fab" opacity=".5"/>
+  <path d="M92 142 Q100 150 108 142" stroke="#1f4a32" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+document.getElementById('main-avatar').innerHTML = avatar(CHARS.ruby, 'm', { weapon: 'wood', hat: 'tiara' });
+document.getElementById('battle-avatar').innerHTML = avatar(CHARS.ruby, 'b', { weapon: 'wand', hat: 'tiara' });
+document.getElementById('fairy').innerHTML = FAIRY;
+document.getElementById('slime').innerHTML = SLIME;
+document.getElementById('cards').innerHTML = Object.entries(CHARS).map(([k, c], i) => `
+  <div class="card ${i === 0 ? 'picked' : ''}" style="--k:${c.k};--k2:${c.k2};--t:${c.t}">
+    <div class="gem"></div>
+    ${avatar(c, 'c' + k)}
+    <div class="nm">${c.name}</div><div class="tr">${c.trait}</div>
+    <div class="tag">${c.tags.map(t => `<span>${t}</span>`).join('')}</div>
+  </div>`).join('');
+document.querySelectorAll('.card').forEach(el => el.onclick = () => {
+  document.querySelectorAll('.card').forEach(x => x.classList.remove('picked')); el.classList.add('picked');
+});
+
+// 반짝이 뿌리기
+document.querySelectorAll('.screen').forEach(sc => {
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement('span');
+    s.className = 'sparkle'; s.textContent = i % 3 ? '✦' : '✧';
+    s.style.left = Math.random() * 100 + '%'; s.style.top = 10 + Math.random() * 80 + '%';
+    s.style.fontSize = 10 + Math.random() * 16 + 'px'; s.style.animationDelay = Math.random() * 2.4 + 's';
+    sc.appendChild(s);
+  }
+});
+
+document.querySelectorAll('#mock-tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#mock-tabs button, .screen').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); document.getElementById(b.dataset.s).classList.add('on');
+});
+</script>
+</body>
+</html>
