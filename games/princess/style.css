@@ -463,3 +463,13 @@ html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
 @keyframes maxGlow { 50% { box-shadow: 0 0 14px rgba(255,200,60,1); } }
 .stat .num .max { font-size: 12px; }
 .pick .maxed { position: absolute; top: 8px; left: 8px; font-family: 'Jua'; font-size: 11px; color: #fff; background: #f2a20c; border-radius: 8px; padding: 1px 6px; }
+
+/* ---------- 저장 파일 내보내기/불러오기 ---------- */
+.slot-card .sexp { position: absolute; top: 6px; right: 44px; font-size: 20px; padding: 4px; border-radius: 10px; background: rgba(255,255,255,.8); }
+.slot-card .sexp:hover { background: #fff1c4; }
+.backup-bar { position: absolute; left: 50%; bottom: 12%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; white-space: nowrap;
+  background: rgba(255,255,255,.85); border: 3px solid #f7c3da; border-radius: 26px; padding: 8px 20px 8px 10px; font-size: 15px; color: #8a4470; }
+.backup-bar .pill { font-size: 17px; padding: 8px 20px; }
+.import-slots { display: flex; flex-direction: column; gap: 10px; align-items: stretch; min-width: 320px; }
+.import-slots .pill { font-size: 17px; padding: 8px 18px; }
+@media (max-width: 1100px) { .backup-bar span { display: none; } }

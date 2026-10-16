@@ -10,7 +10,7 @@ import * as battle from './screens/battle.js';
 import * as ending from './screens/ending.js';
 import * as gallery from './screens/gallery.js';
 import * as slots from './screens/slots.js';
-import { save } from './state.js';
+import { save, requestPersist } from './state.js';
 import { toast } from './ui.js';
 import { initSound } from './sound.js';
 import { installStory } from './story.js';
@@ -60,5 +60,6 @@ const actions = {
 window.princess = ctx;
 
 initSound();
+requestPersist();
 installStory();
 ctx.go('title');
